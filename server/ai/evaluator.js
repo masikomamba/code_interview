@@ -133,10 +133,65 @@ async function callAnthropic(promptText, apiKey) {
 }
 
 /**
+ * Call Azure OpenAI REST API
+ */
+async function callAzureOpenAI(promptText, endpoint, apiKey, deploymentName, apiVersion) {
+  const urlObj = new URL(endpoint.startsWith('http') ? endpoint : `https://${endpoint}`);
+  const basePath = urlObj.pathname.replace(/\/$/, '');
+  const path = `${basePath}/openai/deployments/${encodeURIComponent(deploymentName)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`;
+
+  const options = {
+    hostname: urlObj.hostname,
+    port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
+    path,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': apiKey
+    }
+  };
+
+  const payload = {
+    messages: [
+      { role: 'system', content: EVALUATION_SYSTEM_PROMPT },
+      { role: 'user', content: promptText }
+    ],
+    temperature: 0.2,
+    response_format: { type: 'json_object' }
+  };
+
+  const res = await makeJsonRequest(options, payload);
+  if (res.status === 200 && res.data && res.data.choices && res.data.choices[0]) {
+    return JSON.parse(res.data.choices[0].message.content);
+  }
+  throw new Error(`Azure OpenAI API returned error: ${JSON.stringify(res.data)}`);
+}
+
+/**
  * Master Evaluation Generator
  */
 async function generateEvaluationReport(sessionData) {
   const userPrompt = buildEvaluationUserPrompt(sessionData);
+
+  // Azure OpenAI Provider
+  if (PROVIDER === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
+    try {
+      const apiKey = process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY;
+      const endpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_ENDPOINT;
+      const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || process.env.AZURE_DEPLOYMENT_NAME || 'gpt-4o-mini';
+      const version = process.env.AZURE_OPENAI_API_VERSION || '2024-06-01';
+
+      if (!endpoint) {
+        throw new Error('AZURE_OPENAI_ENDPOINT is not configured.');
+      }
+
+      const report = await callAzureOpenAI(userPrompt, endpoint, apiKey, deployment, version);
+      report.provider = `Azure OpenAI (${deployment})`;
+      return report;
+    } catch (err) {
+      console.warn(`[AI Evaluator] Azure OpenAI call failed, falling back to heuristic engine: ${err.message}`);
+    }
+  }
 
   // If explicit LLM is configured and API key exists
   if (PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) {
