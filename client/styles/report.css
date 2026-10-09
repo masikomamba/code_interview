@@ -1,0 +1,250 @@
+/* ==========================================================================
+   CODEINTERVIEW PLATFORM: AI POST-INTERVIEW EVALUATION REPORT
+   ========================================================================== */
+
+.report-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Executive Recommendation Banner */
+.report-hero-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.recommendation-pill {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  display: inline-block;
+}
+
+.recommendation-pill.strong-hire {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid #10b981;
+}
+
+.recommendation-pill.lean-hire {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid #3b82f6;
+}
+
+.recommendation-pill.lean-no-hire {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid #f59e0b;
+}
+
+.recommendation-pill.strong-no-hire {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid #ef4444;
+}
+
+.score-rating-box {
+  text-align: right;
+}
+
+.score-big-num {
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.score-max-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.report-summary-text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Complexity Grid */
+.complexity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.complexity-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.complexity-card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.complexity-comparison-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.complexity-badge {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  background-color: var(--bg-surface-elevated);
+}
+
+.complexity-badge.optimal {
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.complexity-badge.suboptimal {
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Rubric Breakdown Grid */
+.rubric-scores-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.rubric-score-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rubric-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rubric-card-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rubric-card-score {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.rubric-bar-track {
+  height: 5px;
+  background-color: var(--bg-surface-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rubric-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 3px;
+}
+
+.rubric-card-feedback {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Strengths & Improvements Lists */
+.highlights-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.highlights-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.highlights-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.highlights-title.strengths { color: var(--color-success); }
+.highlights-title.improvements { color: var(--color-warning); }
+
+.highlights-list {
+  padding-left: 18px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.highlights-list li {
+  margin-bottom: 6px;
+}
+
+.hiring-rationale-box {
+  background-color: var(--bg-surface-elevated);
+  border-left: 3px solid var(--color-primary);
+  padding: 12px 14px;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Print Optimization */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .modal-layer {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  .modal-dialog {
+    max-width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+  .modal-header, .modal-footer, .top-nav, .workspace-grid {
+    display: none !important;
+  }
+}

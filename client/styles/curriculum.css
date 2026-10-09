@@ -1,0 +1,233 @@
+/* ==========================================================================
+   CODEINTERVIEW PLATFORM: DSA CURRICULUM, PROGRESS & EDITORIAL STYLES
+   ========================================================================== */
+
+/* 3-Day Inactivity Reminder Banner */
+.inactivity-banner {
+  background-color: rgba(245, 158, 11, 0.12);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 600;
+  z-index: 60;
+  flex-shrink: 0;
+}
+
+.inactivity-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inactivity-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.solved-counter-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-success);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+}
+
+/* DSA Curriculum View Container */
+.curriculum-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.curriculum-module-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.curriculum-module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.curriculum-module-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.curriculum-module-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Python Functions to Know */
+.toolkit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolkit-section-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #60a5fa;
+  letter-spacing: 0.04em;
+}
+
+.toolkit-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toolkit-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toolkit-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolkit-fn-name {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.toolkit-complexity-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #34d399;
+  background-color: var(--color-success-bg);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+}
+
+.toolkit-syntax-code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background-color: var(--bg-app);
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  color: #93c5fd;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.toolkit-desc {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Curriculum Practice Problems List */
+.module-questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.curriculum-question-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  gap: 8px;
+}
+
+.question-status-circle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.question-status-circle.solved {
+  background-color: var(--color-success);
+}
+
+.curriculum-question-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* Editorial Solution Modal */
+.editorial-header-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-app);
+  padding: 10px 14px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-medium);
+  margin-bottom: 14px;
+}
+
+.editorial-python-code {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  margin-bottom: 14px;
+}
+
+.editorial-explanation-body {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

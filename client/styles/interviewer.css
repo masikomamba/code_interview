@@ -1,0 +1,160 @@
+/* ==========================================================================
+   CODEINTERVIEW PLATFORM: INTERVIEWER PRIVATE RUBRIC & NOTES
+   Hidden from candidate by design
+   ========================================================================== */
+
+.interviewer-panel-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.private-banner {
+  background-color: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.private-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #c084fc;
+  letter-spacing: 0.04em;
+}
+
+.sync-status-indicator {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Rubric Scorecard Section */
+.rubric-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rubric-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rubric-item {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rubric-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rubric-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rubric-val-score {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #60a5fa;
+  background-color: var(--bg-surface-elevated);
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.rubric-slider {
+  width: 100%;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.rubric-desc-text {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Quick Observation Tags */
+.quick-observations-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quick-flag-btn {
+  font-size: 0.74rem;
+  padding: 4px 8px;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-flag-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background-color: var(--bg-surface-hover);
+}
+
+.quick-flag-btn.positive:hover {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.quick-flag-btn.caution:hover {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+}
+
+/* Private Notes Editor */
+.private-notes-area {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.private-notes-input {
+  width: 100%;
+  height: 130px;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 10px;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.private-notes-input:focus {
+  border-color: var(--border-focus);
+}

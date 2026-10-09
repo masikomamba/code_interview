@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  interview-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: code-interview-platform:latest
+    container_name: code-interview-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - EXECUTION_ENGINE=local
+      - EXECUTION_TIMEOUT_MS=6000
+      - AI_EVALUATION_PROVIDER=heuristic
+      # Uncomment and fill if using external LLM:
+      # - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 256M

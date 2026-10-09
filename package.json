@@ -1,0 +1,19 @@
+{
+  "name": "real-time-code-interview-platform",
+  "version": "1.0.0",
+  "description": "Production-grade collaborative technical interview platform with WebRTC, sandboxed execution, interviewer annotation, and AI evaluation.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "node tests/test_suite.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}

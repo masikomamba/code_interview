@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CODEINTERVIEW - Real-Time Collaborative Technical Interview Platform</title>
+  <meta name="description" content="Production-grade real-time collaborative code interview platform with WebRTC audio/video, sandboxed execution, interviewer annotation layer, and AI evaluation report.">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/editor.css">
+  <link rel="stylesheet" href="styles/media.css">
+  <link rel="stylesheet" href="styles/interviewer.css">
+  <link rel="stylesheet" href="styles/whiteboard.css">
+  <link rel="stylesheet" href="styles/report.css">
+  <link rel="stylesheet" href="styles/curriculum.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Top Navigation Bar -->
+    <header class="top-nav" role="banner">
+      <div class="nav-left">
+        <div class="brand-title">
+          <span class="brand-dot"></span>
+          CODEINTERVIEW
+        </div>
+        <span class="room-badge" id="nav-room-id" title="Current Session ID">iv-room</span>
+        <span class="role-pill candidate" id="nav-role-badge">Candidate</span>
+        <span class="streak-pill" id="nav-streak-display" title="Current practice streak">Streak: 1 Day</span>
+        <span class="solved-counter-pill" id="nav-solved-count" title="Total problems solved">Solved: 0</span>
+        <div class="session-timer" title="Session Duration">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span id="timer-display">00:00:00</span>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <!-- Problem Selector -->
+        <select id="problem-select" class="control-select" aria-label="Select interview problem">
+          <!-- Populated dynamically via app.js -->
+        </select>
+
+        <!-- Language Selector -->
+        <select id="language-select" class="control-select" aria-label="Select programming language">
+          <option value="python">Python 3</option>
+          <option value="javascript">JavaScript (Node.js)</option>
+          <option value="cpp">C++ (GCC)</option>
+        </select>
+      </div>
+
+      <div class="nav-right">
+        <!-- Execution Buttons -->
+        <button id="run-code-btn" class="btn btn-secondary" title="Run current script (Raw Output)">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Run Code
+        </button>
+
+        <button id="run-tests-btn" class="btn btn-primary" title="Run problem test suite (Ctrl+Enter)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          Run Tests
+        </button>
+
+        <!-- Evaluation Trigger -->
+        <button id="finish-evaluate-btn" class="btn btn-success" title="Complete session & generate AI report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Evaluate
+        </button>
+
+        <!-- Invite Links -->
+        <button id="open-invite-modal-btn" class="btn btn-secondary" title="Share invite links">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+          Invite
+        </button>
+      </div>
+    </header>
+
+    <!-- Inactivity Practice Reminder Banner (3-Day Check) -->
+    <div id="inactivity-reminder-banner" class="inactivity-banner" hidden>
+      <div class="inactivity-banner-left">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>Reminder: It has been <strong id="inactivity-days-count">3 days</strong> since your last DSA practice. Maintain momentum with today's challenge!</span>
+      </div>
+      <div class="inactivity-banner-right">
+        <button type="button" id="practice-now-btn" class="btn btn-secondary" style="background-color: #f59e0b; color: #000; border: none; font-weight: 700;">Practice Now</button>
+        <button type="button" id="dismiss-inactivity-btn" class="btn btn-icon" style="background: none; border: none; color: #fbbf24;" aria-label="Dismiss reminder">✕</button>
+      </div>
+    </div>
+
+    <!-- Main 3-Column Workspace -->
+    <main class="workspace-grid" role="main">
+
+      <!-- LEFT COLUMN: Problem Details / Test Suite / Interviewer Scorecard -->
+      <section class="workspace-panel" aria-label="Problem and rubric panel">
+        <nav class="panel-tab-bar" aria-label="Left panel tabs">
+          <button class="panel-tab active" data-view="problem">Problem</button>
+          <button class="panel-tab" data-view="curriculum">DSA Academy</button>
+          <button class="panel-tab" data-view="tests">Test Suite</button>
+          <button class="panel-tab interviewer-tab" id="tab-interviewer-notes" data-view="interviewer" hidden>
+            Scorecard & Notes
+          </button>
+        </nav>
+
+        <!-- View 1: Problem Statement -->
+        <div class="panel-body panel-body-view" id="view-problem">
+          <div class="problem-meta-row">
+            <span class="difficulty-badge easy" id="problem-diff-badge">Easy</span>
+            <span class="category-tag" id="problem-category-tag">Arrays & HashMaps</span>
+          </div>
+
+          <h1 class="problem-heading" id="problem-heading-title">Two Sum</h1>
+
+          <div class="problem-content" id="problem-content-body">
+            <!-- Dynamic Problem Text Populated via JS -->
+          </div>
+
+          <div class="target-complexity-box">
+            <div class="complexity-item">
+              <span class="complexity-label">Optimal Time</span>
+              <span class="complexity-val" id="target-complexity-time">O(N)</span>
+            </div>
+            <div class="complexity-item">
+              <span class="complexity-label">Optimal Space</span>
+              <span class="complexity-val" id="target-complexity-space">O(N)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 1.5: DSA Curriculum & Python Toolkit -->
+        <div class="panel-body panel-body-view" id="view-curriculum" hidden>
+          <div id="curriculum-content-body" class="curriculum-container">
+            <!-- Dynamic Curriculum Modules -->
+          </div>
+        </div>
+
+        <!-- View 2: Test Suite Details -->
+        <div class="panel-body panel-body-view" id="view-tests" hidden>
+          <div id="test-summary-strip" class="test-summary-strip">
+            <span class="test-metric-pill">0 Tests Executed</span>
+          </div>
+          <div id="test-cards-container" class="test-cards-grid">
+            <!-- Dynamic Test Cards -->
+          </div>
+        </div>
+
+        <!-- View 3: Interviewer Private Scorecard & Notes (Interviewer Only) -->
+        <div class="panel-body panel-body-view" id="view-interviewer" hidden>
+          <div class="interviewer-panel-body">
+            <div class="private-banner">
+              <span class="private-tag">Interviewer Private Layer</span>
+              <span class="sync-status-indicator" id="notes-sync-indicator">Synchronized</span>
+            </div>
+
+            <!-- Rubric Scorecard Sliders -->
+            <div class="rubric-section">
+              <span class="rubric-section-title">Evaluation Rubric</span>
+
+              <!-- DSA Competency -->
+              <div class="rubric-item">
+                <div class="rubric-header-row">
+                  <span class="rubric-label">Data Structures & Algorithms</span>
+                  <span class="rubric-val-score" id="val-rubric-dsa">4</span>
+                </div>
+                <input type="range" min="1" max="5" step="0.5" value="4" class="rubric-slider" id="slider-rubric-dsa">
+                <span class="rubric-desc-text">Sound theoretical foundations and appropriate complexity tradeoffs.</span>
+              </div>
+
+              <!-- Problem Solving Competency -->
+              <div class="rubric-item">
+                <div class="rubric-header-row">
+                  <span class="rubric-label">Problem Solving & Decomposition</span>
+                  <span class="rubric-val-score" id="val-rubric-ps">4</span>
+                </div>
+                <input type="range" min="1" max="5" step="0.5" value="4" class="rubric-slider" id="slider-rubric-ps">
+                <span class="rubric-desc-text">Structured decomposition and systematic roadblock resolution.</span>
+              </div>
+
+              <!-- Code Quality Competency -->
+              <div class="rubric-item">
+                <div class="rubric-header-row">
+                  <span class="rubric-label">Code Quality & Cleanliness</span>
+                  <span class="rubric-val-score" id="val-rubric-quality">4</span>
+                </div>
+                <input type="range" min="1" max="5" step="0.5" value="4" class="rubric-slider" id="slider-rubric-quality">
+                <span class="rubric-desc-text">Readability, modular structuring, and clean idiomatic syntax.</span>
+              </div>
+
+              <!-- Communication Competency -->
+              <div class="rubric-item">
+                <div class="rubric-header-row">
+                  <span class="rubric-label">Communication & Articulation</span>
+                  <span class="rubric-val-score" id="val-rubric-comm">4</span>
+                </div>
+                <input type="range" min="1" max="5" step="0.5" value="4" class="rubric-slider" id="slider-rubric-comm">
+                <span class="rubric-desc-text">Clarity of thought expression, trade-off explanation, and hint receipt.</span>
+              </div>
+            </div>
+
+            <!-- Quick Observation Flags -->
+            <div class="quick-observations-area">
+              <span class="rubric-section-title">Log Observation</span>
+              <div class="quick-tags-grid">
+                <button type="button" class="quick-flag-btn positive" data-flag="Identified optimal O(N) strategy">Optimal O(N)</button>
+                <button type="button" class="quick-flag-btn positive" data-flag="Clearly explained trade-offs">Articulated Trade-offs</button>
+                <button type="button" class="quick-flag-btn positive" data-flag="Proactively validated edge cases">Tested Edge Cases</button>
+                <button type="button" class="quick-flag-btn caution" data-flag="Encountered off-by-one boundary issue">Boundary Issue</button>
+                <button type="button" class="quick-flag-btn caution" data-flag="Required hint for space complexity">Needed Hint</button>
+                <button type="button" class="quick-flag-btn caution" data-flag="Overlooked null/empty input">Missed Empty Input</button>
+              </div>
+            </div>
+
+            <!-- Private Notes Editor -->
+            <div class="private-notes-area">
+              <span class="rubric-section-title">Private Interviewer Notes</span>
+              <textarea 
+                id="interviewer-notes-input" 
+                class="private-notes-input" 
+                placeholder="Take timestamped private notes (e.g. [12:30] Candidate explained two-pointer approach...)"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER COLUMN: Collaborative Code Editor & Terminal Drawer -->
+      <section class="workspace-panel" style="border-right: none;" aria-label="Code editor panel">
+        <div class="editor-wrapper">
+
+          <!-- Editor Header Bar -->
+          <div class="editor-toolbar">
+            <div class="editor-toolbar-left">
+              <div class="file-tab">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                  <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
+                solution.py
+              </div>
+              <span class="cursor-coords" id="cursor-coords-display">Ln 1, Col 1</span>
+            </div>
+
+            <div class="editor-toolbar-right">
+              <!-- Active Peers Presence Pills -->
+              <div class="peer-presence-bar" id="peer-presence-bar">
+                <!-- Populated dynamically -->
+              </div>
+
+              <!-- Reveal Solution & Editorial Button -->
+              <button id="reveal-solution-btn" class="btn btn-secondary" title="View optimal Python solution and editorial walkthrough">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                Solution
+              </button>
+
+              <!-- Whiteboard Annotation Toggle -->
+              <button id="toggle-whiteboard-btn" class="btn btn-secondary" title="Toggle Code Annotation / Whiteboard Layer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Annotate
+              </button>
+            </div>
+          </div>
+
+          <!-- Editor Surface -->
+          <div class="editor-main-area">
+            <!-- Line Numbers & Code Input -->
+            <div class="code-editor-container">
+              <div class="line-numbers-gutter" id="line-numbers-gutter">
+                <span class="line-number active-line" data-line="1">1</span>
+              </div>
+              <textarea 
+                id="code-editor-input" 
+                class="code-textarea" 
+                spellcheck="false" 
+                autocomplete="off" 
+                autocorrect="off" 
+                autocapitalize="off"
+                placeholder="# Write your solution here..."
+              ></textarea>
+            </div>
+
+            <!-- Remote Cursor Presence Markers -->
+            <div id="remote-cursors-layer" style="position: absolute; inset: 0; pointer-events: none;"></div>
+
+            <!-- Transparent Annotation Canvas Overlay -->
+            <canvas id="annotation-canvas" class="annotation-overlay-canvas"></canvas>
+
+            <!-- Floating Whiteboard Dock -->
+            <div id="whiteboard-dock" class="whiteboard-dock" hidden>
+              <button type="button" class="dock-tool-btn active" data-tool="pen" title="Freehand Pen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+              </button>
+              <button type="button" class="dock-tool-btn" data-tool="box" title="Bounding Box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+              </button>
+              <button type="button" class="dock-tool-btn" data-tool="highlight" title="Highlighter">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="22"></line><line x1="16" y1="2" x2="16" y2="22"></line></svg>
+              </button>
+              <div class="dock-separator"></div>
+              <div class="dock-color-swatch active" style="background-color: #ef4444;" data-color="#ef4444"></div>
+              <div class="dock-color-swatch" style="background-color: #3b82f6;" data-color="#3b82f6"></div>
+              <div class="dock-color-swatch" style="background-color: #10b981;" data-color="#10b981"></div>
+              <div class="dock-color-swatch" style="background-color: #f59e0b;" data-color="#f59e0b"></div>
+              <div class="dock-separator"></div>
+              <button type="button" id="wb-clear-btn" class="dock-tool-btn" title="Clear Annotations">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Console Drawer -->
+          <div class="console-drawer">
+            <div class="console-header-bar">
+              <div class="console-tabs">
+                <button class="console-tab active" data-pane="output">Terminal Output</button>
+                <button class="console-tab" data-pane="tests">Test Results</button>
+              </div>
+            </div>
+
+            <div class="console-body">
+              <pre id="console-stdout-view" class="console-stdout"><span class="console-empty">Ready. Click "Run Code" or "Run Tests" to execute.</span></pre>
+              <pre id="console-stderr-view" class="console-stderr"></pre>
+              <div id="console-tests-view" hidden>
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: WebRTC AV Grid & Timeline/Chat -->
+      <section class="workspace-panel" aria-label="Media and communications panel">
+        <div class="media-panel-container">
+
+          <!-- WebRTC Video Tiles -->
+          <div class="video-grid-area">
+            <!-- Remote Peer Video Tile -->
+            <div class="video-tile" id="remote-video-tile">
+              <video id="remote-video-element" class="video-element" autoplay playsinline></video>
+              <div class="video-placeholder" id="remote-video-placeholder">
+                <div class="avatar-initials" style="background-color: #2563eb;">INT</div>
+                <span style="font-size: 0.8rem;">Waiting for peer to join...</span>
+              </div>
+              <div class="tile-overlay-bottom">
+                <span class="tile-name-tag">
+                  <span class="audio-level-indicator"></span>
+                  Interviewer
+                </span>
+                <div class="tile-status-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Local Video Tile -->
+            <div class="video-tile" id="local-video-tile">
+              <video id="local-video-element" class="video-element" autoplay playsinline muted></video>
+              <div class="video-placeholder" id="local-video-placeholder" hidden>
+                <div class="avatar-initials">YOU</div>
+                <span style="font-size: 0.8rem;">Camera Off</span>
+              </div>
+              <div class="tile-overlay-bottom">
+                <span class="tile-name-tag">
+                  <span class="audio-level-indicator"></span>
+                  You (Candidate)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Call Controls Bar -->
+          <div class="call-controls-bar">
+            <button id="toggle-mic-btn" class="call-btn" title="Toggle Microphone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+
+            <button id="toggle-cam-btn" class="call-btn" title="Toggle Camera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 7l-7 5 7 5V7z"></path>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+            </button>
+
+            <button id="toggle-share-btn" class="call-btn" title="Toggle Screen Sharing">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Chat & Session Timeline Feed -->
+          <div class="chat-timeline-container">
+            <div class="chat-messages-scroll" id="chat-messages-scroll">
+              <div class="timeline-system-entry">Session started. All updates are synchronized in real-time.</div>
+            </div>
+
+            <div class="chat-input-row">
+              <input type="text" id="chat-text-input" class="chat-input" placeholder="Type a message or note...">
+              <button type="button" id="chat-send-btn" class="btn btn-secondary">Send</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MODAL 1: Invite & Share Session Links -->
+    <div id="invite-modal" class="modal-layer" hidden role="dialog" aria-modal="true" aria-labelledby="invite-modal-title">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <span class="modal-title" id="invite-modal-title">Share Session Access</span>
+          <button type="button" id="close-invite-modal-btn" class="modal-close-btn" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Candidate Invite Card -->
+          <div class="link-card">
+            <div class="link-card-header">
+              <span class="link-role-title">Candidate Link</span>
+              <span class="role-pill candidate">Standard Access</span>
+            </div>
+            <p class="link-card-desc">Provides clean workstation with problem statement, code editor, test runner, and video call. Private rubrics are hidden.</p>
+            <div class="link-input-row">
+              <input type="text" id="candidate-link-input" class="link-input" readonly>
+              <button type="button" id="copy-candidate-link-btn" class="btn btn-secondary">Copy</button>
+            </div>
+          </div>
+
+          <!-- Interviewer Invite Card -->
+          <div class="link-card">
+            <div class="link-card-header">
+              <span class="link-role-title">Interviewer Link</span>
+              <span class="role-pill interviewer">Privileged Access</span>
+            </div>
+            <p class="link-card-desc">Grants private access to candidate scorecard, secret observation logger, private notes, and whiteboard annotation layer.</p>
+            <div class="link-input-row">
+              <input type="text" id="interviewer-link-input" class="link-input" readonly>
+              <button type="button" id="copy-interviewer-link-btn" class="btn btn-secondary">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: AI Post-Interview Evaluation Report -->
+    <div id="report-modal" class="modal-layer" hidden role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+      <div class="modal-dialog modal-large">
+        <div class="modal-header">
+          <span class="modal-title" id="report-modal-title">AI Post-Interview Evaluation Report</span>
+          <button type="button" id="close-report-modal-btn" class="modal-close-btn" aria-label="Close report modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body" id="report-content-body">
+          <!-- Populated dynamically via report.js -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="copy-report-md-btn" class="btn btn-secondary">Copy as Markdown</button>
+          <button type="button" id="print-report-pdf-btn" class="btn btn-primary">Print / Save PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: Optimal Solution & Editorial Walkthrough -->
+    <div id="editorial-modal" class="modal-layer" hidden role="dialog" aria-modal="true" aria-labelledby="editorial-modal-title">
+      <div class="modal-dialog modal-large">
+        <div class="modal-header">
+          <span class="modal-title" id="editorial-modal-title">Optimal Solution & Editorial Walkthrough</span>
+          <button type="button" id="close-editorial-modal-btn" class="modal-close-btn" aria-label="Close editorial modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="editorial-header-strip">
+            <span style="font-weight: 700; color: var(--text-primary);" id="editorial-problem-title">Two Sum</span>
+            <span class="difficulty-badge easy">Optimal Python 3</span>
+          </div>
+          <h3 style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin-bottom: 6px; text-transform: uppercase;">Python Solution</h3>
+          <pre class="editorial-python-code"><code id="editorial-code-display"></code></pre>
+          <h3 style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; margin: 12px 0 6px; text-transform: uppercase;">Algorithm Walkthrough & Complexity</h3>
+          <div class="editorial-explanation-body" id="editorial-explanation-display"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="copy-solution-to-editor-btn" class="btn btn-primary">Copy Solution to Editor</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Global Toast -->
+    <div id="toast-notice" class="toast-notice" hidden></div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/socket.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/webrtc.js"></script>
+  <script src="js/runner.js"></script>
+  <script src="js/interviewer.js"></script>
+  <script src="js/annotation.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/curriculum.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

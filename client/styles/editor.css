@@ -1,0 +1,326 @@
+/* ==========================================================================
+   CODEINTERVIEW PLATFORM: EDITOR & CONSOLE STYLING
+   ========================================================================== */
+
+.editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--bg-editor);
+  position: relative;
+}
+
+/* Editor Action Toolbar */
+.editor-toolbar {
+  height: 38px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+
+.editor-toolbar-left, .editor-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-tab {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--bg-editor);
+  border: 1px solid var(--border-medium);
+  border-bottom: none;
+  padding: 5px 12px;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cursor-coords {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.peer-presence-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.peer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-medium);
+  background-color: var(--bg-surface-elevated);
+}
+
+.peer-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Editor Canvas Container */
+.editor-main-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Code Editor Component */
+.code-editor-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 20px;
+}
+
+.line-numbers-gutter {
+  width: 48px;
+  padding: 12px 8px 12px 0;
+  text-align: right;
+  color: var(--text-muted);
+  user-select: none;
+  background-color: var(--bg-editor);
+  border-right: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.line-number {
+  height: 20px;
+  display: block;
+}
+
+.line-number.active-line {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.code-textarea {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  color: #e2e8f0;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 12px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 20px;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 4;
+}
+
+/* Remote Cursor Presence Markers */
+.remote-cursor {
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+  transition: all 0.08s ease;
+}
+
+.remote-cursor-label {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   CONSOLE / TEST OUTPUT DRAWER
+   ========================================================================== */
+.console-drawer {
+  height: 220px;
+  min-height: 140px;
+  max-height: 400px;
+  border-top: 1px solid var(--border-medium);
+  background-color: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.console-header-bar {
+  height: 34px;
+  background-color: var(--bg-app);
+  border-bottom: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.console-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.console-tab {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+}
+
+.console-tab:hover {
+  color: var(--text-primary);
+}
+
+.console-tab.active {
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-primary);
+}
+
+.console-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.console-stdout {
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.console-stderr {
+  color: #f87171;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 6px;
+}
+
+.console-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding-top: 10px;
+}
+
+/* Test Runner Cards in Drawer */
+.test-summary-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  margin-bottom: 10px;
+}
+
+.test-metric-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.test-metric-pill.success { color: var(--color-success); }
+.test-metric-pill.failed { color: var(--color-danger); }
+
+.test-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.test-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.test-card.passed {
+  border-left: 3px solid var(--color-success);
+}
+
+.test-card.failed {
+  border-left: 3px solid var(--color-danger);
+}
+
+.test-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.test-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.test-status-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.test-status-tag.passed {
+  background-color: var(--color-success-bg);
+  color: #34d399;
+}
+
+.test-status-tag.failed {
+  background-color: var(--color-danger-bg);
+  color: #f87171;
+}
+
+.test-io-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  font-size: 0.78rem;
+  gap: 6px;
+}
+
+.test-io-label {
+  color: var(--text-muted);
+}
+
+.test-io-val {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
