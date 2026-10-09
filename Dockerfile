@@ -1,23 +1,23 @@
 # Real-Time Collaborative Code Interview Platform
-# Production Multi-Language Container
+# Production Multi-Language Container (Debian 12 Bookworm)
 
-FROM node:20-bullseye-slim
+FROM node:20-bookworm-slim
 
-# Install system dependencies & runtimes for code execution
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies & runtimes for code execution (Python 3, G++, GCC)
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     python3 \
-    python3-pip \
     g++ \
     gcc \
-    openjdk-17-jre-headless \
     curl \
+    ca-certificates \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Install Node dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copy application source code
 COPY . .

@@ -423,8 +423,17 @@
               <div class="timeline-system-entry">Session started. All updates are synchronized in real-time.</div>
             </div>
 
+            <!-- Quick AI Prompt Chips -->
+            <div class="ai-chips-row" id="ai-chips-row">
+              <span class="ai-chips-label">AI Mentor:</span>
+              <button type="button" class="ai-chip-btn" data-prompt="Can you give me a progressive hint on how to approach this problem?">Hint</button>
+              <button type="button" class="ai-chip-btn" data-prompt="What is the optimal time and space complexity and how do I achieve it?">Complexity</button>
+              <button type="button" class="ai-chip-btn" data-prompt="Can you review my current Python code and identify potential edge cases or bugs?">Review Code</button>
+            </div>
+
             <div class="chat-input-row">
-              <input type="text" id="chat-text-input" class="chat-input" placeholder="Type a message or note...">
+              <input type="text" id="chat-text-input" class="chat-input" placeholder="Type a message or ask AI...">
+              <button type="button" id="chat-ask-ai-btn" class="btn btn-secondary" style="border-color: #3b82f6; color: #60a5fa;" title="Ask AI Mentor for assistance">Ask AI</button>
               <button type="button" id="chat-send-btn" class="btn btn-secondary">Send</button>
             </div>
           </div>

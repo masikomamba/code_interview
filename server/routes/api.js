@@ -8,7 +8,7 @@ const router = express.Router();
 const { listProblems, getProblemById, getEditorialSolution, DSA_CURRICULUM } = require('../problems/bank');
 const { createRoom, getRoom, validateRole, getClientRoomState, broadcast } = require('../rooms');
 const { executeCode, runTestCases } = require('../execution/runner');
-const { generateEvaluationReport } = require('../ai/evaluator');
+const { generateEvaluationReport, askAiMentor } = require('../ai/evaluator');
 const { getUserProgress, recordUserActivity } = require('../db');
 
 /**
@@ -221,6 +221,36 @@ router.post('/evaluate', async (req, res) => {
   } catch (err) {
     console.error('Evaluation error:', err);
     res.status(500).json({ error: `Failed to generate evaluation report: ${err.message}` });
+  }
+});
+
+/**
+ * Interactive AI Mentor live conversation endpoint
+ */
+router.post('/ai/chat', async (req, res) => {
+  try {
+    const { question, problemId, code, language, history } = req.body;
+    let problem = null;
+    if (problemId) {
+      problem = getProblemById(problemId);
+    }
+
+    const result = await askAiMentor({
+      question,
+      problem,
+      code,
+      language: language || 'python',
+      chatHistory: history || []
+    });
+
+    res.json({
+      success: true,
+      answer: result.text,
+      provider: result.provider
+    });
+  } catch (err) {
+    console.error('AI chat endpoint error:', err);
+    res.status(500).json({ error: `AI Mentor error: ${err.message}` });
   }
 });
 

@@ -369,34 +369,153 @@
     initChat() {
       const chatInput = document.getElementById('chat-text-input');
       const chatSendBtn = document.getElementById('chat-send-btn');
+      const chatAskAiBtn = document.getElementById('chat-ask-ai-btn');
+      const aiChips = document.querySelectorAll('.ai-chip-btn');
+
+      const triggerAiQuery = async (questionText) => {
+        const text = questionText.trim();
+        if (!text) return;
+
+        const timeStr = this.timerDisplay ? this.timerDisplay.textContent : '00:00';
+        const userAuthor = this.role === 'interviewer' ? 'Interviewer' : 'Candidate';
+        const msgId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+        // 1. Post user message immediately to local UI
+        const userEvt = {
+          id: msgId,
+          text,
+          timeStr,
+          author: userAuthor,
+          flag: 'chat'
+        };
+        this.appendTimelineEvent(userEvt);
+
+        // Broadcast to peers if connected
+        window.socketClient.send('TIMELINE_EVENT', userEvt);
+
+        // 2. Add temporary thinking indicator
+        const thinkingEvt = {
+          id: 'thinking-indicator-entry',
+          text: 'Analyzing problem context and formulating guidance...',
+          timeStr,
+          author: 'AI Mentor',
+          flag: 'ai-thinking'
+        };
+        this.appendTimelineEvent(thinkingEvt);
+
+        try {
+          const res = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: text.replace(/^@ai\s*/i, ''),
+              problemId: this.currentProblem ? this.currentProblem.id : 'two-sum',
+              code: window.editor ? window.editor.getCode() : '',
+              language: this.languageSelect ? this.languageSelect.value : 'python'
+            })
+          });
+
+          // Remove thinking indicator
+          const thinkingEl = document.getElementById('ai-thinking-indicator');
+          if (thinkingEl) thinkingEl.remove();
+
+          if (!res.ok) {
+            throw new Error(`Server returned HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          const aiResponseText = data.answer || 'I am ready to help. Please ask any question about the problem or implementation.';
+
+          const aiEvt = {
+            id: `ai-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            text: aiResponseText,
+            timeStr,
+            author: 'AI Mentor',
+            provider: data.provider || 'AI Assistant',
+            flag: 'ai'
+          };
+
+          // Render AI message immediately to local UI
+          this.appendTimelineEvent(aiEvt);
+
+          // Broadcast to peers
+          window.socketClient.send('TIMELINE_EVENT', aiEvt);
+        } catch (err) {
+          const thinkingEl = document.getElementById('ai-thinking-indicator');
+          if (thinkingEl) thinkingEl.remove();
+
+          this.appendTimelineEvent({
+            id: `ai-err-${Date.now()}`,
+            text: `Failed to query AI Mentor: ${err.message}`,
+            timeStr,
+            author: 'AI Mentor',
+            flag: 'ai'
+          });
+        }
+      };
 
       const send = () => {
         if (!chatInput) return;
         const text = chatInput.value.trim();
         if (!text) return;
 
+        chatInput.value = '';
+
+        // If explicitly addressing AI or asking a question
+        const isQuestion = /^@ai\b/i.test(text) || text.endsWith('?') || /^(how|why|what|can you|hint|help)\b/i.test(text);
+
+        if (isQuestion) {
+          triggerAiQuery(text);
+          return;
+        }
+
         const timeStr = this.timerDisplay ? this.timerDisplay.textContent : '00:00';
-        window.socketClient.send('TIMELINE_EVENT', {
+        const userEvt = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
           text,
           timeStr,
           author: this.role === 'interviewer' ? 'Interviewer' : 'Candidate',
           flag: 'chat'
-        });
-        chatInput.value = '';
+        };
+
+        // Render immediately in local UI
+        this.appendTimelineEvent(userEvt);
+
+        // Broadcast to WebSocket peers
+        window.socketClient.send('TIMELINE_EVENT', userEvt);
       };
 
       if (chatSendBtn) chatSendBtn.addEventListener('click', send);
+      if (chatAskAiBtn) {
+        chatAskAiBtn.addEventListener('click', () => {
+          if (!chatInput) return;
+          const text = chatInput.value.trim() || 'Can you give me a hint on how to approach this problem?';
+          chatInput.value = '';
+          triggerAiQuery(text);
+        });
+      }
+
       if (chatInput) {
         chatInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') send();
         });
       }
+
+      // Quick Prompt Chips
+      aiChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const prompt = chip.getAttribute('data-prompt');
+          if (prompt) triggerAiQuery(prompt);
+        });
+      });
     }
 
     renderTimeline(events) {
       const container = document.getElementById('chat-messages-scroll');
       if (!container) return;
       container.innerHTML = '';
+      if (!this.renderedEventIds) this.renderedEventIds = new Set();
+      this.renderedEventIds.clear();
       for (const evt of events) {
         this.appendTimelineEvent(evt);
       }
@@ -406,10 +525,35 @@
       const container = document.getElementById('chat-messages-scroll');
       if (!container || !evt) return;
 
+      if (!this.renderedEventIds) this.renderedEventIds = new Set();
+      const dedupeKey = evt.id || `${evt.author}-${evt.timeStr}-${evt.text}`;
+      if (evt.flag !== 'ai-thinking' && this.renderedEventIds.has(dedupeKey)) {
+        return;
+      }
+      if (evt.flag !== 'ai-thinking') {
+        this.renderedEventIds.add(dedupeKey);
+      }
+
       const bubble = document.createElement('div');
       if (evt.flag === 'info' || evt.flag === 'join' || evt.flag === 'leave') {
         bubble.className = 'timeline-system-entry';
         bubble.textContent = `[${evt.timeStr || '00:00'}] ${evt.text}`;
+      } else if (evt.flag === 'ai-thinking') {
+        bubble.id = 'ai-thinking-indicator';
+        bubble.className = 'timeline-system-entry';
+        bubble.style.color = '#60a5fa';
+        bubble.textContent = `[${evt.timeStr || '00:00'}] AI Mentor is analyzing...`;
+      } else if (evt.flag === 'ai' || evt.author === 'AI Mentor') {
+        bubble.className = 'chat-bubble ai-mentor';
+        const formattedHtml = this.formatMarkdown(evt.text);
+        bubble.innerHTML = `
+          <div class="chat-bubble-header">
+            <span class="chat-author">AI Mentor</span>
+            ${evt.provider ? `<span class="chat-provider-tag">(${evt.provider})</span>` : ''}
+            <span class="chat-time">${evt.timeStr || '00:00'}</span>
+          </div>
+          <div class="chat-text">${formattedHtml}</div>
+        `;
       } else {
         bubble.className = 'chat-bubble';
         bubble.innerHTML = `
@@ -417,7 +561,7 @@
             <span class="chat-author">${evt.author || 'User'}</span>
             <span class="chat-time">${evt.timeStr || '00:00'}</span>
           </div>
-          <div class="chat-text">${evt.text}</div>
+          <div class="chat-text">${this.formatMarkdown(evt.text)}</div>
         `;
       }
       container.appendChild(bubble);
