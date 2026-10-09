@@ -28,14 +28,16 @@ class CurriculumManager {
     };
 
     this.currentEditorialSolution = null;
+    this.username = localStorage.getItem('dsa_user') || 'masiko';
 
     this.init();
   }
 
   async init() {
     this.initEvents();
-    this.checkInactivityAndStreak();
     this.updateProgressUI();
+    await this.syncProgressFromDatabase();
+    this.checkInactivityAndStreak();
     await this.loadCurriculum();
     this.requestNotificationPermission();
   }
@@ -207,7 +209,30 @@ class CurriculumManager {
     this.renderCurriculum();
   }
 
-  recordActivity(problemId, status = 'attempted') {
+  async syncProgressFromDatabase() {
+    try {
+      const res = await fetch(`/api/progress?username=${encodeURIComponent(this.username)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.solvedProblemIds)) {
+          this.progress.solvedProblemIds = data.solvedProblemIds;
+          this.progress.attemptedProblemIds = data.attemptedProblemIds || [];
+          this.progress.streakDays = data.streakDays || 1;
+          this.progress.lastPracticeTimestamp = data.lastPracticeTimestamp || Date.now();
+
+          localStorage.setItem('dsa_solved', JSON.stringify(this.progress.solvedProblemIds));
+          localStorage.setItem('dsa_attempted', JSON.stringify(this.progress.attemptedProblemIds));
+          localStorage.setItem('dsa_streak', this.progress.streakDays.toString());
+          localStorage.setItem('dsa_last_practice', this.progress.lastPracticeTimestamp.toString());
+          this.updateProgressUI();
+        }
+      }
+    } catch (err) {
+      console.warn('[Curriculum] Could not reach database, using local cached progress:', err);
+    }
+  }
+
+  async recordActivity(problemId, status = 'attempted') {
     const now = Date.now();
     const daysSince = Math.floor((now - this.progress.lastPracticeTimestamp) / (1000 * 60 * 60 * 24));
     
@@ -225,12 +250,24 @@ class CurriculumManager {
     localStorage.setItem('dsa_last_practice', now.toString());
     localStorage.setItem('dsa_streak', this.progress.streakDays.toString());
 
-    // Sync to backend
-    fetch('/api/progress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ problemId, status })
-    }).catch(() => {});
+    // Sync to database
+    try {
+      const res = await fetch('/api/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: this.username,
+          problemId,
+          status
+        })
+      });
+      const data = await res.json();
+      if (data.progress) {
+        this.progress.solvedProblemIds = data.progress.solvedProblemIds || this.progress.solvedProblemIds;
+        this.progress.streakDays = data.progress.streakDays || this.progress.streakDays;
+        this.updateProgressUI();
+      }
+    } catch (_) {}
   }
 
   checkInactivityAndStreak() {

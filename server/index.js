@@ -29,6 +29,7 @@ const {
   broadcast,
   getClientRoomState
 } = require('./rooms');
+const { initDatabase } = require('./db');
 
 const app = express();
 const server = http.createServer(app);
@@ -271,8 +272,12 @@ const pingInterval = setInterval(() => {
 
 wss.on('close', () => clearInterval(pingInterval));
 
-const PORT = parseInt(process.env.PORT, 10) || 3000;
+const PORT = parseInt(process.env.PORT, 10) || 8080;
 const HOST = process.env.HOST || '0.0.0.0';
+
+initDatabase().catch(err => {
+  console.error('[DB] Failed to initialize database:', err);
+});
 
 server.listen(PORT, HOST, () => {
   console.log(`[CODEINTERVIEW PLATFORM] Server active at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);

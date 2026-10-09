@@ -9,6 +9,7 @@ const { createRoom, getRoom, validateRole, getClientRoomState } = require('../se
 const { executeCode, runTestCases } = require('../server/execution/runner');
 const { analyzeCodeComplexity, generateHeuristicReport } = require('../server/ai/heuristics');
 const { generateEvaluationReport } = require('../server/ai/evaluator');
+const { getUserProgress, recordUserActivity } = require('../server/db');
 
 async function runTestSuite() {
   console.log('==================================================');
@@ -155,6 +156,22 @@ def two_sum(nums, target):
     assert(twoSumSolution, 'Two Sum must have editorial solution');
     assert(twoSumSolution.python.includes('def two_sum'), 'Must have valid Python solution');
     assert(twoSumSolution.explanation, 'Must have algorithmic explanation');
+  });
+
+  // 6. Database Progress & Multi-Device Sync Tests
+  await testAsync('Database Service: Tracks and syncs user progress across devices', async () => {
+    const testUser = `test_user_${Date.now()}`;
+    const initial = await getUserProgress(testUser);
+    assert.strictEqual(initial.solvedProblemIds.length, 0);
+    assert.strictEqual(initial.streakDays, 1);
+
+    // Record solved problem
+    const updated = await recordUserActivity(testUser, 'two-sum', 'solved');
+    assert(updated.solvedProblemIds.includes('two-sum'), 'Solved problems must include two-sum');
+
+    // Re-query user progress (simulating opening on a new device)
+    const synced = await getUserProgress(testUser);
+    assert(synced.solvedProblemIds.includes('two-sum'), 'New device must fetch persisted solved problems');
   });
 
   console.log(`\n--------------------------------------------------`);

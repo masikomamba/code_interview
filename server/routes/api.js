@@ -9,15 +9,7 @@ const { listProblems, getProblemById, getEditorialSolution, DSA_CURRICULUM } = r
 const { createRoom, getRoom, validateRole, getClientRoomState, broadcast } = require('../rooms');
 const { executeCode, runTestCases } = require('../execution/runner');
 const { generateEvaluationReport } = require('../ai/evaluator');
-
-// In-Memory Progress Store with Persistent Streak Calculator
-let userProgress = {
-  solvedProblemIds: [],
-  attemptedProblemIds: [],
-  lastPracticeTimestamp: Date.now(),
-  streakDays: 1,
-  history: []
-};
+const { getUserProgress, recordUserActivity } = require('../db');
 
 /**
  * Health check endpoint
@@ -78,58 +70,32 @@ router.get('/curriculum', (req, res) => {
 });
 
 /**
- * Get user learning progress and streak data
+ * Get user learning progress and streak data from database
  */
-router.get('/progress', (req, res) => {
-  const now = Date.now();
-  const daysSinceLast = Math.floor((now - userProgress.lastPracticeTimestamp) / (1000 * 60 * 60 * 24));
-  res.json({
-    ...userProgress,
-    daysSinceLastPractice: daysSinceLast,
-    needsReminder: daysSinceLast >= 3
-  });
+router.get('/progress', async (req, res) => {
+  try {
+    const username = req.query.username || 'masiko';
+    const progress = await getUserProgress(username);
+    res.json(progress);
+  } catch (err) {
+    res.status(500).json({ error: `Database error: ${err.message}` });
+  }
 });
 
 /**
- * Update user progress (e.g. problem solved or attempted)
+ * Update user progress in database
  */
-router.post('/progress', (req, res) => {
-  const { problemId, status } = req.body;
-  const now = Date.now();
-
-  if (problemId) {
-    if (status === 'solved') {
-      if (!userProgress.solvedProblemIds.includes(problemId)) {
-        userProgress.solvedProblemIds.push(problemId);
-      }
-    } else {
-      if (!userProgress.attemptedProblemIds.includes(problemId)) {
-        userProgress.attemptedProblemIds.push(problemId);
-      }
-    }
+router.post('/progress', async (req, res) => {
+  try {
+    const { username = 'masiko', problemId, status } = req.body;
+    const progress = await recordUserActivity(username, problemId, status);
+    res.json({
+      success: true,
+      progress
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Database error: ${err.message}` });
   }
-
-  // Update streak logic
-  const daysDiff = Math.floor((now - userProgress.lastPracticeTimestamp) / (1000 * 60 * 60 * 24));
-  if (daysDiff === 1) {
-    userProgress.streakDays += 1;
-  } else if (daysDiff > 1) {
-    userProgress.streakDays = 1; // streak reset if missed a day
-  }
-
-  userProgress.lastPracticeTimestamp = now;
-  userProgress.history.push({
-    timestamp: now,
-    problemId,
-    status
-  });
-
-  res.json({
-    success: true,
-    progress: userProgress,
-    daysSinceLastPractice: 0,
-    needsReminder: false
-  });
 });
 
 /**

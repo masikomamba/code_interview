@@ -9,10 +9,11 @@ services:
     container_name: code-interview-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8080:8080"
+      - "3000:8080"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=8080
       - HOST=0.0.0.0
       - EXECUTION_ENGINE=local
       - EXECUTION_TIMEOUT_MS=6000
@@ -22,7 +23,7 @@ services:
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -24,15 +24,11 @@ COPY . .
 
 # Set execution environment defaults
 ENV NODE_ENV=production \
-    PORT=3000 \
+    PORT=8080 \
     HOST=0.0.0.0 \
     EXECUTION_ENGINE=local \
     EXECUTION_TIMEOUT_MS=6000
 
-# Health check endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
-
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["node", "server/index.js"]
