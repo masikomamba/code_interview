@@ -29,6 +29,7 @@ class CurriculumManager {
 
     this.currentEditorialSolution = null;
     this.username = localStorage.getItem('dsa_user') || 'masiko';
+    this.selectedModuleId = localStorage.getItem('dsa_active_module') || null;
 
     this.init();
   }
@@ -93,53 +94,199 @@ class CurriculumManager {
 
   renderCurriculum() {
     if (!this.curriculumContainer) return;
-    this.curriculumContainer.innerHTML = this.curriculumData.map(module => `
-      <div class="curriculum-module-card">
-        <div class="curriculum-module-header">
-          <span class="curriculum-module-title">${module.title}</span>
-        </div>
-        <p class="curriculum-module-desc">${module.description}</p>
+    if (this.selectedModuleId) {
+      const module = this.curriculumData.find(m => m.id === this.selectedModuleId);
+      if (module) {
+        this.renderModulePage(module);
+        return;
+      }
+      this.selectedModuleId = null;
+    }
+    this.renderMainHub();
+  }
 
-        <!-- Python Functions to Know -->
+  renderMainHub() {
+    const allProblems = this.curriculumData.flatMap(m => m.problems || []);
+    const totalProblems = allProblems.length;
+    const solvedCount = allProblems.filter(p => this.progress.solvedProblemIds.includes(p.id)).length;
+    const percent = Math.round((solvedCount / Math.max(1, totalProblems)) * 100);
+
+    this.curriculumContainer.innerHTML = `
+      <div class="academy-hub">
+        <!-- Hub Hero Overview -->
+        <div class="academy-hero-card">
+          <div class="academy-hero-title-row">
+            <span class="academy-hero-title">Python DSA Academy</span>
+            <span class="difficulty-badge easy">${this.curriculumData.length} Core Modules</span>
+          </div>
+          <p class="academy-hero-subtitle">
+            Master fundamental data structures and algorithmic patterns in Python with curated LeetCode questions and function toolkits.
+          </p>
+
+          <div class="academy-overall-progress">
+            <div class="academy-progress-label-row">
+              <span class="academy-progress-title">Curriculum Mastery</span>
+              <span class="academy-progress-stats">${solvedCount} / ${totalProblems} Solved (${percent}%)</span>
+            </div>
+            <div class="academy-progress-track">
+              <div class="academy-progress-bar" style="width: ${percent}%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modules Directory Grid -->
+        <div class="academy-modules-grid">
+          ${this.curriculumData.map(mod => {
+            const modProblems = mod.problems || [];
+            const modSolved = modProblems.filter(p => this.progress.solvedProblemIds.includes(p.id)).length;
+            const isMastered = modSolved === modProblems.length && modProblems.length > 0;
+
+            return `
+              <div class="academy-module-card" data-open-module="${mod.id}" title="Click to open ${mod.title} study page">
+                <div class="academy-module-header">
+                  <span class="academy-module-title">${mod.title}</span>
+                  <span class="academy-module-badge ${isMastered ? 'mastered' : ''}">${isMastered ? 'Mastered' : `${modSolved}/${modProblems.length}`}</span>
+                </div>
+                <p class="academy-module-desc">${mod.description}</p>
+                <div class="academy-module-meta-row">
+                  <div class="academy-module-counts">
+                    <span>${(mod.pythonToolkit || []).length} Python Tools</span>
+                    <span>•</span>
+                    <span>${modProblems.length} Problems</span>
+                  </div>
+                  <span class="academy-module-open-link">
+                    Explore Page
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    // Click on module card to navigate to its dedicated page
+    const cards = this.curriculumContainer.querySelectorAll('.academy-module-card[data-open-module]');
+    cards.forEach(c => {
+      c.addEventListener('click', () => {
+        const modId = c.getAttribute('data-open-module');
+        this.openModule(modId);
+      });
+    });
+  }
+
+  renderModulePage(module) {
+    const modProblems = module.problems || [];
+    const modSolved = modProblems.filter(p => this.progress.solvedProblemIds.includes(p.id)).length;
+
+    this.curriculumContainer.innerHTML = `
+      <div class="data-structure-page">
+        <!-- Navigation Bar / Back button -->
+        <div class="ds-nav-bar">
+          <button type="button" class="ds-back-btn" id="ds-back-to-hub-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            All Data Structures
+          </button>
+          <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">
+            Module: ${module.id}
+          </span>
+        </div>
+
+        <!-- Module Hero Section -->
+        <div class="ds-hero-section">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h2 class="ds-hero-title">${module.title}</h2>
+            <span class="difficulty-badge easy">${modSolved} / ${modProblems.length} Solved</span>
+          </div>
+          <p class="ds-hero-desc">${module.description}</p>
+          <div class="ds-stats-strip">
+            <span class="ds-stat-pill">${(module.pythonToolkit || []).length} Python Functions</span>
+            <span class="ds-stat-pill">${modProblems.length} Practice Problems</span>
+            <span class="ds-stat-pill">${(module.keyPatterns || []).length} Core Patterns</span>
+          </div>
+        </div>
+
+        <!-- Part 1: Python Functions & Methods to Know -->
         <div class="toolkit-section">
-          <span class="toolkit-section-title">Python Functions & Methods to Know</span>
+          <span class="toolkit-section-title">Must-Know Python Functions & Methods</span>
           <div class="toolkit-cards-list">
-            ${(module.pythonToolkit || []).map(tool => `
+            ${(module.pythonToolkit || []).map((tool, idx) => `
               <div class="toolkit-card">
                 <div class="toolkit-card-top">
                   <span class="toolkit-fn-name">${tool.name}</span>
                   <span class="toolkit-complexity-badge">${tool.complexity}</span>
                 </div>
-                <div class="toolkit-syntax-code">${tool.syntax}</div>
+                <div class="toolkit-syntax-code" id="syntax-code-${idx}">${tool.syntax}</div>
                 <div class="toolkit-desc">${tool.description}</div>
               </div>
             `).join('')}
           </div>
         </div>
 
-        <!-- Topic Practice Questions -->
+        <!-- Part 2: Core Algorithmic Patterns & Mental Models -->
+        ${module.keyPatterns && module.keyPatterns.length > 0 ? `
+          <div class="patterns-section">
+            <span class="toolkit-section-title">Core Interview Patterns</span>
+            ${module.keyPatterns.map(pat => `
+              <div class="pattern-item">${pat}</div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <!-- Part 3: Curated LeetCode Practice Problems -->
         <div class="toolkit-section">
-          <span class="toolkit-section-title">Topic Practice Questions</span>
+          <span class="toolkit-section-title">Topic Practice Problems</span>
           <div class="module-questions-list">
-            ${(module.problems || []).map(prob => {
+            ${modProblems.map(prob => {
               const isSolved = this.progress.solvedProblemIds.includes(prob.id);
               return `
                 <div class="curriculum-question-item">
                   <span class="question-status-circle ${isSolved ? 'solved' : ''}" title="${isSolved ? 'Solved' : 'Not yet solved'}"></span>
-                  <span class="curriculum-question-name">${prob.title}</span>
+                  <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                    <span class="curriculum-question-name">${prob.title}</span>
+                    <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
+                      Target: ${prob.optimalComplexity ? `${prob.optimalComplexity.time} time, ${prob.optimalComplexity.space} space` : 'O(N)'}
+                    </span>
+                  </div>
                   <span class="difficulty-badge ${prob.difficulty.toLowerCase()}">${prob.difficulty}</span>
-                  <button type="button" class="btn btn-secondary curriculum-practice-btn" data-problem-id="${prob.id}">
-                    Practice
-                  </button>
+                  <div class="curriculum-question-actions">
+                    <button type="button" class="btn btn-secondary curriculum-practice-btn" data-problem-id="${prob.id}" title="Open problem in code editor">
+                      Practice
+                    </button>
+                    <button type="button" class="btn btn-secondary curriculum-solution-btn" data-problem-id="${prob.id}" title="View editorial solution">
+                      Solution
+                    </button>
+                  </div>
                 </div>
               `;
             }).join('')}
           </div>
         </div>
-      </div>
-    `).join('');
 
-    // Attach click listeners to "Practice" buttons
+        <!-- Part 4: Ask AI Mentor for Coaching -->
+        <div style="background-color: var(--bg-surface); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 0.76rem; font-weight: 700; color: #60a5fa; text-transform: uppercase;">AI Coaching on ${module.title}</span>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">Need clarification on when to use this data structure or how to optimize? Ask the AI Mentor in chat.</p>
+          <button type="button" class="btn btn-secondary ds-ask-ai-mentor-btn" data-mod-title="${module.title}" style="align-self: flex-start; color: #60a5fa; border-color: #3b82f6;">
+            Ask AI Mentor about ${module.title}
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    // Back to hub button
+    const backBtn = document.getElementById('ds-back-to-hub-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => this.backToHub());
+    }
+
+    // Practice buttons
     const practiceBtns = this.curriculumContainer.querySelectorAll('.curriculum-practice-btn');
     practiceBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -147,6 +294,44 @@ class CurriculumManager {
         this.selectProblemInApp(problemId);
       });
     });
+
+    // Editorial Solution buttons
+    const solutionBtns = this.curriculumContainer.querySelectorAll('.curriculum-solution-btn');
+    solutionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const problemId = btn.getAttribute('data-problem-id');
+        this.revealSolution(problemId);
+      });
+    });
+
+    // Ask AI Mentor button
+    const askAiBtn = this.curriculumContainer.querySelector('.ds-ask-ai-mentor-btn');
+    if (askAiBtn) {
+      askAiBtn.addEventListener('click', () => {
+        const title = askAiBtn.getAttribute('data-mod-title');
+        const chatInput = document.getElementById('chat-text-input');
+        const chatAskAiBtn = document.getElementById('chat-ask-ai-btn');
+        if (chatInput && chatAskAiBtn) {
+          chatInput.value = `Can you explain the key patterns and Python idioms I need to know for ${title}?`;
+          chatAskAiBtn.click();
+          if (window.showToast) window.showToast(`Asking AI Mentor about ${title}...`);
+        }
+      });
+    }
+  }
+
+  openModule(moduleId) {
+    this.selectedModuleId = moduleId;
+    localStorage.setItem('dsa_active_module', moduleId);
+    this.renderCurriculum();
+    if (this.curriculumContainer) this.curriculumContainer.scrollTop = 0;
+  }
+
+  backToHub() {
+    this.selectedModuleId = null;
+    localStorage.removeItem('dsa_active_module');
+    this.renderCurriculum();
+    if (this.curriculumContainer) this.curriculumContainer.scrollTop = 0;
   }
 
   selectProblemInApp(problemId) {
@@ -170,10 +355,10 @@ class CurriculumManager {
     if (window.showToast) window.showToast(`Loaded ${problemId} in Python 3`);
   }
 
-  async revealSolution() {
-    const problemId = window.currentProblemId || 'two-sum';
+  async revealSolution(problemId = null) {
+    const targetId = problemId || window.currentProblemId || 'two-sum';
     try {
-      const res = await fetch(`/api/problems/${problemId}/solution`);
+      const res = await fetch(`/api/problems/${targetId}/solution`);
       if (!res.ok) {
         alert('Editorial solution is not available for this problem yet.');
         return;
@@ -182,8 +367,7 @@ class CurriculumManager {
       this.currentEditorialSolution = data;
 
       if (this.editorialTitleEl) {
-        const probTitle = document.getElementById('problem-heading-title');
-        this.editorialTitleEl.textContent = probTitle ? probTitle.textContent : 'Solution Walkthrough';
+        this.editorialTitleEl.textContent = data.title || targetId;
       }
       if (this.editorialCodeEl) {
         this.editorialCodeEl.textContent = data.python;

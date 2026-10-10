@@ -58,37 +58,265 @@
 .curriculum-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   padding: 16px;
   overflow-y: auto;
 }
 
-.curriculum-module-card {
+/* --------------------------------------------------------------------------
+   ACADEMY MAIN PAGE (OVERVIEW HUB)
+   -------------------------------------------------------------------------- */
+.academy-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.academy-hero-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.academy-hero-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.academy-hero-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.academy-hero-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.academy-overall-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.academy-progress-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.academy-progress-title {
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.academy-progress-stats {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #34d399;
+}
+
+.academy-progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--bg-app);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.academy-progress-bar {
+  height: 100%;
+  background-color: #10b981;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* Academy Grid of Data Structures */
+.academy-modules-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.academy-module-card {
   background-color: var(--bg-app);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
   padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
-.curriculum-module-header {
+.academy-module-card:hover {
+  border-color: #3b82f6;
+  background-color: var(--bg-surface-elevated);
+}
+
+.academy-module-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
-.curriculum-module-title {
-  font-size: 0.95rem;
+.academy-module-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.academy-module-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.academy-module-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.academy-module-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+
+.academy-module-counts {
+  display: flex;
+  gap: 10px;
+}
+
+.academy-module-open-link {
+  color: #60a5fa;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   INDIVIDUAL DATA STRUCTURE PAGE
+   -------------------------------------------------------------------------- */
+.data-structure-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ds-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.ds-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #60a5fa;
+  background: none;
+  border: 1px solid var(--border-medium);
+  padding: 5px 10px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ds-back-btn:hover {
+  background-color: var(--bg-surface-elevated);
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+.ds-hero-section {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ds-hero-title {
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-primary);
 }
 
-.curriculum-module-desc {
+.ds-hero-desc {
   font-size: 0.82rem;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.45;
+}
+
+.ds-stats-strip {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.ds-stat-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+}
+
+/* Algorithmic Patterns Section */
+.patterns-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pattern-item {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid #3b82f6;
+  border-radius: var(--radius-xs);
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  line-height: 1.35;
 }
 
 /* Python Functions to Know */
@@ -109,17 +337,17 @@
 .toolkit-cards-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .toolkit-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 8px 10px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .toolkit-card-top {
@@ -130,7 +358,7 @@
 
 .toolkit-fn-name {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -141,39 +369,40 @@
   font-weight: 700;
   color: #34d399;
   background-color: var(--color-success-bg);
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: var(--radius-xs);
 }
 
 .toolkit-syntax-code {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   background-color: var(--bg-app);
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: var(--radius-xs);
   color: #93c5fd;
   white-space: pre-wrap;
   word-break: break-all;
+  border: 1px solid var(--border-subtle);
 }
 
 .toolkit-desc {
-  font-size: 0.74rem;
-  color: var(--text-muted);
-  line-height: 1.3;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
 }
 
 /* Curriculum Practice Problems List */
 .module-questions-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .curriculum-question-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 10px 12px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
@@ -197,6 +426,12 @@
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
+}
+
+.curriculum-question-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Editorial Solution Modal */
