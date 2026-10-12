@@ -9,7 +9,104 @@ const { listProblems, getProblemById, getEditorialSolution, DSA_CURRICULUM } = r
 const { createRoom, getRoom, validateRole, getClientRoomState, broadcast } = require('../rooms');
 const { executeCode, runTestCases } = require('../execution/runner');
 const { generateEvaluationReport, askAiMentor } = require('../ai/evaluator');
-const { getUserProgress, recordUserActivity } = require('../db');
+const {
+  getUserProgress,
+  recordUserActivity,
+  registerUser,
+  loginUser,
+  getUserBySession,
+  logoutSession
+} = require('../db');
+
+/**
+ * Authentication Endpoints
+ */
+
+// Register a new user account
+router.post('/auth/register', async (req, res) => {
+  try {
+    const { username, password, displayName, email } = req.body;
+    const result = await registerUser({ username, password, displayName, email });
+    const progress = await getUserProgress(result.user.username);
+    res.json({
+      success: true,
+      token: result.token,
+      user: result.user,
+      progress
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message || 'Registration failed'
+    });
+  }
+});
+
+// Login to an existing user account
+router.post('/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const result = await loginUser({ username, password });
+    const progress = await getUserProgress(result.user.username);
+    res.json({
+      success: true,
+      token: result.token,
+      user: result.user,
+      progress
+    });
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      error: err.message || 'Login failed'
+    });
+  }
+});
+
+// Get current authenticated user profile
+router.get('/auth/me', async (req, res) => {
+  try {
+    let token = '';
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7).trim();
+    } else if (req.query.token) {
+      token = req.query.token;
+    }
+
+    if (!token) {
+      return res.json({ authenticated: false, user: null });
+    }
+
+    const user = await getUserBySession(token);
+    if (!user) {
+      return res.json({ authenticated: false, user: null });
+    }
+
+    const progress = await getUserProgress(user.username);
+    res.json({
+      authenticated: true,
+      user,
+      progress
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Auth verification error: ${err.message}` });
+  }
+});
+
+// Logout current session
+router.post('/auth/logout', async (req, res) => {
+  try {
+    let token = req.body.token;
+    const authHeader = req.headers.authorization;
+    if (!token && authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7).trim();
+    }
+    await logoutSession(token);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: `Logout error: ${err.message}` });
+  }
+});
 
 /**
  * Health check endpoint

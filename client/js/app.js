@@ -46,6 +46,17 @@
       window.report = new window.ReportManager();
       window.curriculum = new window.CurriculumManager();
 
+      // Initialize Auth & Problem Menu Services
+      if (window.authService) {
+        await window.authService.init();
+      }
+      if (window.menuService) {
+        await window.menuService.init();
+        if (window.location.hash === '#menu') {
+          window.menuService.showMenuView();
+        }
+      }
+
       // 3. Ensure Room Exists or Auto-Create Practice Session
       if (!this.roomId) {
         await this.createPracticeSession();

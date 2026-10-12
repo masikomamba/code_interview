@@ -336,8 +336,9 @@ function listProblems() {
     difficulty: p.difficulty,
     category: p.category,
     optimalComplexity: p.optimalComplexity,
-    testCasesCount: p.testCases.length,
-    hasEditorial: !!p.editorialSolution
+    testCasesCount: p.testCases ? p.testCases.length : 0,
+    hasEditorial: !!p.editorialSolution,
+    summary: p.description ? p.description.split('\n')[0].replace(/[#`*]/g, '').trim() : ''
   }));
 }
 

@@ -28,9 +28,12 @@ class CurriculumManager {
     };
 
     this.currentEditorialSolution = null;
-    this.username = localStorage.getItem('dsa_user') || 'masiko';
+    this.username = (window.authService && window.authService.isAuthenticated())
+      ? window.authService.getCurrentUsername()
+      : (localStorage.getItem('dsa_user') || 'masiko');
     this.selectedModuleId = localStorage.getItem('dsa_active_module') || null;
 
+    window.curriculumService = this;
     this.init();
   }
 
@@ -61,6 +64,36 @@ class CurriculumManager {
           window.editor.broadcastCodeChange();
           if (this.editorialModal) this.editorialModal.hidden = true;
           if (window.showToast) window.showToast('Editorial solution copied into editor');
+        }
+      });
+    }
+
+    // React to user account login / logout changes
+    if (window.authService) {
+      window.authService.onAuthChange(async (data) => {
+        if (data && data.user) {
+          this.username = data.user.username;
+        } else {
+          this.username = 'masiko';
+        }
+        localStorage.setItem('dsa_user', this.username);
+        if (data && data.progress) {
+          this.progress.solvedProblemIds = data.progress.solvedProblemIds || [];
+          this.progress.attemptedProblemIds = data.progress.attemptedProblemIds || [];
+          this.progress.streakDays = data.progress.streakDays || 1;
+          this.progress.lastPracticeTimestamp = data.progress.lastPracticeTimestamp || Date.now();
+          localStorage.setItem('dsa_solved', JSON.stringify(this.progress.solvedProblemIds));
+          localStorage.setItem('dsa_attempted', JSON.stringify(this.progress.attemptedProblemIds));
+          localStorage.setItem('dsa_streak', this.progress.streakDays.toString());
+          localStorage.setItem('dsa_last_practice', this.progress.lastPracticeTimestamp.toString());
+          this.updateProgressUI();
+          this.renderCurriculum();
+        } else {
+          await this.syncProgressFromDatabase();
+        }
+        if (window.menuService) {
+          window.menuService.updateStats();
+          window.menuService.renderProblemGrid();
         }
       });
     }
@@ -436,9 +469,13 @@ class CurriculumManager {
 
     // Sync to database
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (window.authService && window.authService.token) {
+        headers['Authorization'] = `Bearer ${window.authService.token}`;
+      }
       const res = await fetch('/api/progress', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           username: this.username,
           problemId,
@@ -452,6 +489,11 @@ class CurriculumManager {
         this.updateProgressUI();
       }
     } catch (_) {}
+
+    if (window.menuService) {
+      window.menuService.updateStats();
+      window.menuService.renderProblemGrid();
+    }
   }
 
   checkInactivityAndStreak() {
