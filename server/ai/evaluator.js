@@ -45,7 +45,7 @@ function makeJsonRequest(options, postData) {
           const parsed = JSON.parse(data);
           resolve({ status: res.statusCode, data: parsed, raw: data });
         } catch (err) {
-          reject(new Error(`Failed to parse JSON response (${res.statusCode}): ${data}`));
+          resolve({ status: res.statusCode, data: { raw: data, error: `Non-JSON response: ${data.slice(0, 300)}` }, raw: data });
         }
       });
     });
@@ -156,38 +156,279 @@ async function callAnthropic(promptText, apiKey) {
 }
 
 /**
+ * Helper to retrieve Azure OpenAI configuration from environment variables
+ * Supports multiple standard alias names for model / deployment
+ */
+function getAzureEnvConfig() {
+  const apiKey = (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY || '').trim();
+  const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_ENDPOINT || '').trim();
+  const deployment = (
+    process.env.AZURE_OPENAI_DEPLOYMENT_NAME ||
+    process.env.AZURE_DEPLOYMENT_NAME ||
+    process.env.AZURE_OPENAI_MODEL ||
+    process.env.AZURE_MODEL ||
+    process.env.AZURE_AI_MODEL ||
+    process.env.MODEL_NAME ||
+    process.env.AI_MODEL ||
+    ''
+  ).trim() || null;
+  const version = (process.env.AZURE_OPENAI_API_VERSION || process.env.AZURE_API_VERSION || '').trim() || null;
+
+  return { apiKey, endpoint, deployment, version };
+}
+
+let cachedDiscoveredDeployments = null;
+let cachedWorkingDeployment = null;
+
+/**
+ * Auto-discover deployed models from Azure endpoints
+ */
+async function discoverAzureDeployments(endpoint, apiKey, apiVersion) {
+  if (cachedDiscoveredDeployments && cachedDiscoveredDeployments.length > 0) {
+    return cachedDiscoveredDeployments;
+  }
+
+  let urlStr = (endpoint || '').trim();
+  if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+    urlStr = `https://${urlStr}`;
+  }
+  let parsed;
+  try {
+    parsed = new URL(urlStr);
+  } catch (_) {
+    return [];
+  }
+
+  const results = [];
+  const basePath = parsed.pathname.replace(/\/chat\/completions.*/, '').replace(/\/$/, '');
+  const isV1 = parsed.pathname.includes('/openai/v1') || parsed.pathname.endsWith('/v1');
+  const isProject = parsed.hostname.includes('services.ai.azure.com') || parsed.pathname.includes('/api/projects/');
+
+  const probePaths = [];
+  if (isV1) {
+    const v1Base = basePath.includes('/openai/v1') ? basePath : (basePath.endsWith('/v1') ? basePath : `${basePath}/openai/v1`);
+    probePaths.push(`${v1Base}/models`);
+  }
+  if (isProject) {
+    probePaths.push(`${basePath}/models`);
+  }
+  probePaths.push(`/openai/deployments?api-version=${encodeURIComponent(apiVersion || '2024-06-01')}`);
+  probePaths.push(`/openai/models?api-version=${encodeURIComponent(apiVersion || '2024-06-01')}`);
+
+  for (const probePath of probePaths) {
+    try {
+      const options = {
+        hostname: parsed.hostname,
+        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+        path: probePath,
+        method: 'GET',
+        headers: {
+          'api-key': apiKey,
+          'Authorization': `Bearer ${apiKey}`
+        }
+      };
+
+      const res = await makeJsonRequest(options, null);
+      if (res.status === 200 && res.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        for (const item of res.data.data) {
+          const id = item.id || item.name || item.model;
+          if (id && typeof id === 'string') {
+            const lower = id.toLowerCase();
+            if (!lower.includes('embedding') && !lower.includes('dall-e') && !lower.includes('whisper') && !lower.includes('tts')) {
+              results.push(id);
+            }
+          }
+        }
+        if (results.length > 0) {
+          console.log(`[Azure AI] Auto-discovered models on ${parsed.hostname}: ${results.join(', ')}`);
+          cachedDiscoveredDeployments = Array.from(new Set(results));
+          return cachedDiscoveredDeployments;
+        }
+      }
+    } catch (_) {}
+  }
+
+  return results;
+}
+
+/**
+ * Smart Azure OpenAI configuration resolver.
+ * Handles:
+ * 1. Azure OpenAI v1-compatible endpoint (e.g. https://<resource>.openai.azure.com/openai/v1)
+ * 2. Azure AI Foundry / Project endpoint (e.g. https://<resource>.services.ai.azure.com/api/projects/proj-default)
+ * 3. Full Azure completion URL (auto-extracts host, path, deployment, api-version)
+ * 4. Classic Azure OpenAI endpoint (https://<resource>.openai.azure.com)
+ */
+async function resolveAzureConfig(endpoint, apiKey, explicitDeployment, explicitVersion) {
+  let urlStr = (endpoint || '').trim();
+  if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+    urlStr = `https://${urlStr}`;
+  }
+  const parsed = new URL(urlStr);
+
+  let deployment = explicitDeployment || null;
+  let apiVersion = explicitVersion || parsed.searchParams.get('api-version') || '2024-06-01';
+
+  // Check special endpoint types
+  const isV1Endpoint = parsed.pathname.includes('/openai/v1') || parsed.pathname.endsWith('/v1');
+  const isProjectEndpoint = parsed.hostname.includes('services.ai.azure.com') || parsed.pathname.includes('/api/projects/');
+
+  // 1. OpenAI v1-compatible endpoint (e.g. openai.azure.com/openai/v1)
+  if (isV1Endpoint) {
+    const basePath = parsed.pathname.replace(/\/chat\/completions.*/, '').replace(/\/$/, '');
+    const cleanPath = basePath.includes('/openai/v1') ? basePath : (basePath.endsWith('/v1') ? basePath : `${basePath}/openai/v1`);
+    const requestPath = `${cleanPath}/chat/completions${parsed.search || ''}`;
+    return {
+      hostname: parsed.hostname,
+      port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+      path: requestPath,
+      isV1Style: true,
+      deployment: deployment || 'default',
+      apiVersion
+    };
+  }
+
+  // 2. Azure AI Foundry Project endpoint (e.g. services.ai.azure.com/api/projects/proj-default)
+  if (isProjectEndpoint) {
+    const basePath = parsed.pathname.replace(/\/chat\/completions.*/, '').replace(/\/$/, '');
+    const requestPath = `${basePath}/chat/completions${parsed.search || ''}`;
+    return {
+      hostname: parsed.hostname,
+      port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+      path: requestPath,
+      isV1Style: true,
+      deployment: deployment || 'default',
+      apiVersion
+    };
+  }
+
+  // 3. Classic Azure OpenAI deployments endpoint:
+  // If deployment name is embedded in pathname: /openai/deployments/([^/]+)
+  const match = parsed.pathname.match(/\/openai\/deployments\/([^/]+)/);
+  if (match && match[1]) {
+    deployment = decodeURIComponent(match[1]);
+  }
+
+  // If no deployment is specified, try auto-discovering from Azure deployments API
+  if (!deployment) {
+    try {
+      const discovered = await discoverAzureDeployments(endpoint, apiKey, apiVersion);
+      if (discovered && discovered.length > 0) {
+        deployment = discovered[0];
+      }
+    } catch (_) {}
+  }
+
+  if (!deployment) {
+    deployment = 'gpt-4o';
+  }
+
+  // Construct canonical path
+  let requestPath = '';
+  if (parsed.pathname.includes('/chat/completions')) {
+    requestPath = parsed.pathname + (parsed.search || `?api-version=${encodeURIComponent(apiVersion)}`);
+  } else {
+    const basePath = parsed.pathname.replace(/\/openai\/deployments\/[^/]+.*/, '').replace(/\/$/, '');
+    requestPath = `${basePath}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`;
+  }
+
+  return {
+    hostname: parsed.hostname,
+    port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+    path: requestPath,
+    isV1Style: false,
+    deployment,
+    apiVersion
+  };
+}
+
+/**
  * Call Azure OpenAI REST API
  */
 async function callAzureOpenAI(promptText, endpoint, apiKey, deploymentName, apiVersion) {
-  const urlObj = new URL(endpoint.startsWith('http') ? endpoint : `https://${endpoint}`);
-  const basePath = urlObj.pathname.replace(/\/$/, '');
-  const path = `${basePath}/openai/deployments/${encodeURIComponent(deploymentName)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`;
-
-  const options = {
-    hostname: urlObj.hostname,
-    port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
-    path,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': apiKey
+  let candidates = [];
+  if (deploymentName) {
+    candidates = [deploymentName];
+  } else {
+    if (cachedWorkingDeployment) {
+      candidates.push(cachedWorkingDeployment);
     }
-  };
-
-  const payload = {
-    messages: [
-      { role: 'system', content: EVALUATION_SYSTEM_PROMPT },
-      { role: 'user', content: promptText }
-    ],
-    temperature: 0.2,
-    response_format: { type: 'json_object' }
-  };
-
-  const res = await makeJsonRequest(options, payload);
-  if (res.status === 200 && res.data && res.data.choices && res.data.choices[0]) {
-    return JSON.parse(res.data.choices[0].message.content);
+    try {
+      const discovered = await discoverAzureDeployments(endpoint, apiKey, apiVersion);
+      if (discovered && discovered.length > 0) {
+        candidates.push(...discovered);
+      }
+    } catch (_) {}
+    candidates.push('gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-35-turbo', 'Phi-3-mini-4k-instruct', 'Phi-3.5-mini-instruct');
+    candidates = Array.from(new Set(candidates.filter(Boolean)));
   }
-  throw new Error(`Azure OpenAI API returned error: ${JSON.stringify(res.data)}`);
+
+  let lastError = null;
+
+  for (const candidate of candidates) {
+    try {
+      const config = await resolveAzureConfig(endpoint, apiKey, candidate, apiVersion);
+
+      const options = {
+        hostname: config.hostname,
+        port: config.port,
+        path: config.path,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': apiKey,
+          'Authorization': `Bearer ${apiKey}`
+        }
+      };
+
+      const payload = {
+        model: config.deployment,
+        messages: [
+          { role: 'system', content: EVALUATION_SYSTEM_PROMPT },
+          { role: 'user', content: promptText }
+        ],
+        temperature: 0.2,
+        response_format: { type: 'json_object' }
+      };
+
+      let res = await makeJsonRequest(options, payload);
+
+      // Retry without response_format if model does not support it
+      if (res.status === 400 && res.data && JSON.stringify(res.data).includes('response_format')) {
+        delete payload.response_format;
+        res = await makeJsonRequest(options, payload);
+      }
+
+      if (res.status === 200 && res.data && res.data.choices && res.data.choices[0]) {
+        const content = res.data.choices[0].message.content;
+        cachedWorkingDeployment = config.deployment;
+        try {
+          return { data: JSON.parse(content), deployment: config.deployment };
+        } catch (_) {
+          const match = content.match(/\{[\s\S]*\}/);
+          if (match) {
+            return { data: JSON.parse(match[0]), deployment: config.deployment };
+          }
+          throw new Error('Could not parse JSON report from model response.');
+        }
+      }
+
+      if (res.status === 404 && !deploymentName) {
+        lastError = new Error(`Azure OpenAI returned error (404) for model "${candidate}": ${JSON.stringify(res.data)}`);
+        continue;
+      }
+
+      throw new Error(`Azure OpenAI API returned error (${res.status}): ${JSON.stringify(res.data)}`);
+    } catch (err) {
+      lastError = err;
+      if (err.message && err.message.includes('404') && !deploymentName) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || new Error(`Azure OpenAI API returned error (404): Resource not found. Please set AZURE_OPENAI_DEPLOYMENT_NAME or AZURE_OPENAI_MODEL in Cloud Run to your deployed model name.`);
 }
 
 /**
@@ -200,18 +441,15 @@ async function generateEvaluationReport(sessionData) {
   // Azure OpenAI Provider
   if (provider === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
     try {
-      const apiKey = process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY;
-      const endpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_ENDPOINT;
-      const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || process.env.AZURE_DEPLOYMENT_NAME || 'gpt-4o-mini';
-      const version = process.env.AZURE_OPENAI_API_VERSION || '2024-06-01';
+      const { apiKey, endpoint, deployment, version } = getAzureEnvConfig();
 
       if (!endpoint) {
         throw new Error('AZURE_OPENAI_ENDPOINT is not configured.');
       }
 
-      const report = await callAzureOpenAI(userPrompt, endpoint, apiKey, deployment, version);
-      report.provider = `Azure OpenAI (${deployment})`;
-      return report;
+      const { data, deployment: activeDeployment } = await callAzureOpenAI(userPrompt, endpoint, apiKey, deployment, version);
+      data.provider = `Azure OpenAI (${activeDeployment})`;
+      return data;
     } catch (err) {
       console.error(`[AI Evaluator] Azure OpenAI call failed (${err.message}). Falling back to heuristic engine.`);
     }
@@ -268,32 +506,70 @@ Rules:
  * Call Azure OpenAI Chat Completion for interactive questions
  */
 async function callAzureChat(messages, endpoint, apiKey, deploymentName, apiVersion) {
-  const urlObj = new URL(endpoint.startsWith('http') ? endpoint : `https://${endpoint}`);
-  const basePath = urlObj.pathname.replace(/\/$/, '');
-  const path = `${basePath}/openai/deployments/${encodeURIComponent(deploymentName)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`;
-
-  const options = {
-    hostname: urlObj.hostname,
-    port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
-    path,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': apiKey
+  let candidates = [];
+  if (deploymentName) {
+    candidates = [deploymentName];
+  } else {
+    if (cachedWorkingDeployment) {
+      candidates.push(cachedWorkingDeployment);
     }
-  };
-
-  const payload = {
-    messages,
-    temperature: 0.3,
-    max_tokens: 1200
-  };
-
-  const res = await makeJsonRequest(options, payload);
-  if (res.status === 200 && res.data && res.data.choices && res.data.choices[0]) {
-    return res.data.choices[0].message.content;
+    try {
+      const discovered = await discoverAzureDeployments(endpoint, apiKey, apiVersion);
+      if (discovered && discovered.length > 0) {
+        candidates.push(...discovered);
+      }
+    } catch (_) {}
+    candidates.push('gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-35-turbo', 'Phi-3-mini-4k-instruct', 'Phi-3.5-mini-instruct');
+    candidates = Array.from(new Set(candidates.filter(Boolean)));
   }
-  throw new Error(`Azure OpenAI chat returned error (${res.status}): ${JSON.stringify(res.data)}`);
+
+  let lastError = null;
+
+  for (const candidate of candidates) {
+    try {
+      const config = await resolveAzureConfig(endpoint, apiKey, candidate, apiVersion);
+
+      const options = {
+        hostname: config.hostname,
+        port: config.port,
+        path: config.path,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': apiKey,
+          'Authorization': `Bearer ${apiKey}`
+        }
+      };
+
+      const payload = {
+        model: config.deployment,
+        messages,
+        temperature: 0.3,
+        max_tokens: 1200
+      };
+
+      const res = await makeJsonRequest(options, payload);
+      if (res.status === 200 && res.data && res.data.choices && res.data.choices[0]) {
+        cachedWorkingDeployment = config.deployment;
+        return { text: res.data.choices[0].message.content, deployment: config.deployment };
+      }
+
+      if (res.status === 404 && !deploymentName) {
+        lastError = new Error(`Azure OpenAI chat returned error (404) for model "${candidate}": ${JSON.stringify(res.data)}`);
+        continue;
+      }
+
+      throw new Error(`Azure OpenAI chat returned error (${res.status}): ${JSON.stringify(res.data)}`);
+    } catch (err) {
+      lastError = err;
+      if (err.message && err.message.includes('404') && !deploymentName) {
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || new Error(`Azure OpenAI chat returned error (404): Resource not found. Please set AZURE_OPENAI_DEPLOYMENT_NAME or AZURE_OPENAI_MODEL in Cloud Run to your deployed model name.`);
 }
 
 /**
@@ -481,14 +757,11 @@ ${question}`;
   // Azure OpenAI
   if (provider === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
     try {
-      const apiKey = process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY;
-      const endpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_ENDPOINT;
-      const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || process.env.AZURE_DEPLOYMENT_NAME || 'gpt-4o-mini';
-      const version = process.env.AZURE_OPENAI_API_VERSION || '2024-06-01';
+      const { apiKey, endpoint, deployment, version } = getAzureEnvConfig();
 
       if (endpoint) {
-        const text = await callAzureChat(messages, endpoint, apiKey, deployment, version);
-        return { text, provider: `Azure OpenAI (${deployment})` };
+        const { text, deployment: activeDeployment } = await callAzureChat(messages, endpoint, apiKey, deployment, version);
+        return { text, provider: `Azure OpenAI (${activeDeployment})` };
       } else {
         console.warn('[AI Mentor] AZURE_OPENAI_ENDPOINT is not defined.');
       }
