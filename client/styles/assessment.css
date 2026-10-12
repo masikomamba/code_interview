@@ -1,0 +1,146 @@
+/* ==========================================================================
+   CODEINTERVIEW PLATFORM: TIMED CODING ASSESSMENTS
+   ========================================================================== */
+
+/* Active Assessment Countdown Pill in Header */
+.assessment-countdown-pill {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  letter-spacing: 0.02em;
+  animation: assessmentPulse 2s infinite ease-in-out;
+}
+
+@keyframes assessmentPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.82; }
+}
+
+.assessment-countdown-pill.warning {
+  background-color: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+
+.assessment-countdown-pill.danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #f87171;
+  animation: assessmentDangerPulse 1s infinite ease-in-out;
+}
+
+@keyframes assessmentDangerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Preset Duration Cards Grid */
+.preset-duration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.preset-duration-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.preset-duration-card:hover {
+  border-color: #3b82f6;
+  background-color: var(--bg-surface-elevated);
+}
+
+.preset-duration-card.active {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.preset-time-label {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preset-desc {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+/* Assessment Settings Row */
+.assessment-option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+}
+
+.assessment-option-row input[type="checkbox"] {
+  accent-color: #3b82f6;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* Assessment Notice Box */
+.assessment-info-banner {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-left: 3px solid #f59e0b;
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 10px;
+}
+
+/* Submit Assessment Pulsing Header Button */
+.btn-assessment-submit {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 1px solid #10b981 !important;
+}
+
+.btn-assessment-submit:hover {
+  background-color: #047857 !important;
+}
+
+.btn-assessment-abort {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0 4px;
+}
+
+.btn-assessment-abort:hover {
+  color: #f87171;
+}

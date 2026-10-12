@@ -177,7 +177,7 @@ router.post('/execute', async (req, res) => {
  */
 router.post('/evaluate', async (req, res) => {
   try {
-    const { roomId, token, problemId, code, language, testResults } = req.body;
+    const { roomId, token, problemId, code, language, testResults, assessment } = req.body;
 
     let problem = null;
     let interviewerNotes = null;
@@ -202,7 +202,8 @@ router.post('/evaluate', async (req, res) => {
       language: language || 'python',
       testResults,
       interviewerNotes,
-      timelineEvents
+      timelineEvents,
+      assessment
     });
 
     // Save to room if valid

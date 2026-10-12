@@ -74,7 +74,7 @@ function analyzeCodeComplexity(code, language) {
 /**
  * Generate heuristic post-interview report
  */
-function generateHeuristicReport({ problem, code, language, testResults, interviewerNotes, timelineEvents }) {
+function generateHeuristicReport({ problem, code, language, testResults, interviewerNotes, timelineEvents, assessment }) {
   const complexity = analyzeCodeComplexity(code || '', language || 'python');
   
   // Calculate test pass metrics
@@ -148,10 +148,22 @@ function generateHeuristicReport({ problem, code, language, testResults, intervi
     strengths.push(`Interviewer Observation: ${interviewerComments}`);
   }
 
+  if (assessment && assessment.isTimed) {
+    if (assessment.timedOut) {
+      areasForImprovement.push(`Assessment time limit of ${assessment.allocatedMinutes} minutes expired prior to submission.`);
+    } else {
+      strengths.push(`Completed timed assessment within allocated window (${assessment.timeSpentMinutes} mins used of ${assessment.allocatedMinutes} mins).`);
+    }
+  }
+
+  const assessmentExtra = assessment && assessment.isTimed
+    ? ` Under timed assessment conditions (${assessment.allocatedMinutes} min limit), the candidate ${assessment.timedOut ? 'timed out before completion' : `finished the challenge in ${assessment.timeSpentMinutes} minutes`}.`
+    : '';
+
   return {
     recommendation,
     overallScore,
-    summary: `During this technical interview on ${problem ? problem.title : 'Technical Coding Assessment'}, the candidate demonstrated solid technical aptitude using ${language.toUpperCase()}. The candidate constructed a solution spanning ${codeLen} lines of code, achieving an estimated runtime complexity of ${complexity.estimatedTime} and space complexity of ${complexity.estimatedSpace}. Automated test validation resulted in ${passedTests}/${totalTests} unit tests passing cleanly.`,
+    summary: `During this technical interview on ${problem ? problem.title : 'Technical Coding Assessment'}, the candidate demonstrated solid technical aptitude using ${language.toUpperCase()}. The candidate constructed a solution spanning ${codeLen} lines of code, achieving an estimated runtime complexity of ${complexity.estimatedTime} and space complexity of ${complexity.estimatedSpace}. Automated test validation resulted in ${passedTests}/${totalTests} unit tests passing cleanly.${assessmentExtra}`,
     complexityAnalysis: {
       actualTimeComplexity: complexity.estimatedTime,
       actualSpaceComplexity: complexity.estimatedSpace,

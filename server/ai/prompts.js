@@ -50,9 +50,19 @@ Your output MUST be a valid JSON object matching the following structure:
   "hiringRationale": "Concise justification for the final recommendation"
 }`;
 
-function buildEvaluationUserPrompt({ problem, code, language, testResults, interviewerNotes, timelineEvents }) {
-  return `### INTERVIEW SESSION DATA
+function buildEvaluationUserPrompt({ problem, code, language, testResults, interviewerNotes, timelineEvents, assessment }) {
+  let assessmentContext = '';
+  if (assessment && assessment.isTimed) {
+    assessmentContext = `
+**Timed Assessment Mode**: ACTIVE
+* Allocated Duration: ${assessment.allocatedMinutes || 45} Minutes
+* Time Taken: ${assessment.timeSpentMinutes || 0} Minutes
+* Timed Out: ${assessment.timedOut ? 'YES (Solution auto-submitted upon timer expiry)' : 'NO (Submitted within allocated time)'}
+`;
+  }
 
+  return `### INTERVIEW SESSION DATA
+${assessmentContext}
 **Problem Title**: ${problem ? problem.title : 'Custom Technical Challenge'}
 **Difficulty**: ${problem ? problem.difficulty : 'Medium'}
 **Optimal Target**: Time: ${problem && problem.optimalComplexity ? problem.optimalComplexity.time : 'O(N)'}, Space: ${problem && problem.optimalComplexity ? problem.optimalComplexity.space : 'O(N)'}

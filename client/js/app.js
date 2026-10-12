@@ -570,6 +570,9 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    new InterviewApp();
+    window.interviewApp = new InterviewApp();
+    if (window.AssessmentManager) {
+      window.assessmentManager = new AssessmentManager();
+    }
   });
 })();
