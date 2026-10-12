@@ -179,6 +179,11 @@ class AssessmentManager {
     if (this.timerInterval) clearInterval(this.timerInterval);
     this.timerInterval = setInterval(() => this.tick(), 1000);
 
+    // Start timer strictly upon assessment launch
+    if (window.interviewApp && window.interviewApp.startAssessmentTimer) {
+      window.interviewApp.startAssessmentTimer();
+    }
+
     // Announce to timeline
     window.socketClient.send('TIMELINE_EVENT', {
       text: `Timed Coding Assessment started! Time limit: ${this.selectedDuration} minutes.`,
@@ -256,7 +261,12 @@ class AssessmentManager {
     if (this.submitBtn) this.submitBtn.hidden = true;
     if (this.abortBtn) this.abortBtn.hidden = true;
     if (this.openBtn) this.openBtn.hidden = false;
-    if (this.sessionTimer) this.sessionTimer.hidden = false;
+    if (this.sessionTimer) this.sessionTimer.hidden = true;
+
+    // Stop timer
+    if (window.interviewApp && window.interviewApp.stopAssessmentTimer) {
+      window.interviewApp.stopAssessmentTimer();
+    }
 
     // Unlock Solution button
     if (this.revealSolutionBtn) {
@@ -349,7 +359,12 @@ class AssessmentManager {
     if (this.submitBtn) this.submitBtn.hidden = true;
     if (this.abortBtn) this.abortBtn.hidden = true;
     if (this.openBtn) this.openBtn.hidden = false;
-    if (this.sessionTimer) this.sessionTimer.hidden = false;
+    if (this.sessionTimer) this.sessionTimer.hidden = true;
+
+    // Stop timer
+    if (window.interviewApp && window.interviewApp.stopAssessmentTimer) {
+      window.interviewApp.stopAssessmentTimer();
+    }
 
     if (this.revealSolutionBtn) {
       this.revealSolutionBtn.disabled = false;

@@ -26,6 +26,7 @@
       this.timerSeconds = 0;
       this.timerInterval = null;
 
+      window.interviewApp = this;
       this.init();
     }
 
@@ -73,8 +74,20 @@
       this.roleBadge = document.getElementById('nav-role-badge');
       this.problemSelect = document.getElementById('problem-select');
       this.languageSelect = document.getElementById('language-select');
+      this.editorFilename = document.getElementById('editor-filename');
+      this.sessionTimer = document.getElementById('session-timer-widget') || document.querySelector('.session-timer');
       this.interviewerTabBtn = document.getElementById('tab-interviewer-notes');
       this.timerDisplay = document.getElementById('timer-display');
+
+      if (this.languageSelect) {
+        this.languageSelect.addEventListener('change', (e) => {
+          const lang = e.target.value;
+          this.updateEditorFilename(lang);
+          if (window.socketClient) {
+            window.socketClient.send('LANGUAGE_CHANGE', { language: lang });
+          }
+        });
+      }
     }
 
     async createPracticeSession() {
@@ -151,6 +164,7 @@
 
         if (state.language && this.languageSelect) {
           this.languageSelect.value = state.language;
+          this.updateEditorFilename(state.language);
         }
 
         if (state.problemId) {
@@ -174,6 +188,7 @@
       window.socketClient.on('LANGUAGE_UPDATE', (data) => {
         if (this.languageSelect && data.language !== this.languageSelect.value) {
           this.languageSelect.value = data.language;
+          this.updateEditorFilename(data.language);
         }
       });
     }
@@ -276,6 +291,18 @@
     }
 
     initTimer() {
+      // Timer is idle at 00:00:00 on initial page load.
+      // Starts strictly when a timed assessment is launched.
+      this.timerSeconds = 0;
+      this.sessionTimer = document.getElementById('session-timer-widget') || document.querySelector('.session-timer');
+      if (this.timerDisplay) this.timerDisplay.textContent = '00:00:00';
+      if (this.sessionTimer) this.sessionTimer.hidden = true;
+    }
+
+    startAssessmentTimer() {
+      if (this.timerInterval) clearInterval(this.timerInterval);
+      this.timerSeconds = 0;
+      if (this.sessionTimer) this.sessionTimer.hidden = false;
       this.timerInterval = setInterval(() => {
         this.timerSeconds++;
         const hrs = Math.floor(this.timerSeconds / 3600);
@@ -284,6 +311,22 @@
         const timeStr = `${hrs > 0 ? String(hrs).padStart(2, '0') + ':' : ''}${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         if (this.timerDisplay) this.timerDisplay.textContent = timeStr;
       }, 1000);
+    }
+
+    stopAssessmentTimer() {
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+      this.timerSeconds = 0;
+      if (this.timerDisplay) this.timerDisplay.textContent = '00:00:00';
+      if (this.sessionTimer) this.sessionTimer.hidden = true;
+    }
+
+    updateEditorFilename(language) {
+      if (!this.editorFilename) return;
+      const exts = { python: 'solution.py', javascript: 'solution.js', cpp: 'solution.cpp' };
+      this.editorFilename.textContent = exts[language] || 'solution.py';
     }
 
     initTabs() {

@@ -29,7 +29,7 @@
         <span class="role-pill candidate" id="nav-role-badge">Candidate</span>
         <span class="streak-pill" id="nav-streak-display" title="Current practice streak">Streak: 1 Day</span>
         <span class="solved-counter-pill" id="nav-solved-count" title="Total problems solved">Solved: 0</span>
-        <div class="session-timer" title="Session Duration">
+        <div class="session-timer" id="session-timer-widget" title="Assessment Duration" hidden>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
@@ -72,32 +72,9 @@
         <select id="problem-select" class="control-select" aria-label="Select interview problem">
           <!-- Populated dynamically via app.js -->
         </select>
-
-        <!-- Language Selector -->
-        <select id="language-select" class="control-select" aria-label="Select programming language">
-          <option value="python">Python 3</option>
-          <option value="javascript">JavaScript (Node.js)</option>
-          <option value="cpp">C++ (GCC)</option>
-        </select>
       </div>
 
       <div class="nav-right">
-        <!-- Execution Buttons -->
-        <button id="run-code-btn" class="btn btn-secondary" title="Run current script (Raw Output)">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Run Code
-        </button>
-
-        <button id="run-tests-btn" class="btn btn-primary" title="Run problem test suite (Ctrl+Enter)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-          Run Tests
-        </button>
-
         <!-- Timed Assessment Launcher -->
         <button type="button" id="open-assessment-btn" class="btn btn-secondary" style="border-color: #f59e0b; color: #fbbf24;" title="Start a timed technical interview assessment">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -129,15 +106,39 @@
           Invite
         </button>
 
-        <!-- User Authentication & Account Trigger -->
+        <!-- User Authentication Widget: Dedicated Log In and Log Out -->
         <div class="auth-header-container" id="auth-header-container">
-          <button type="button" id="header-auth-btn" class="btn btn-secondary auth-trigger-btn" title="Sign in or view user account">
+          <!-- When Logged Out: Dedicated Log In Button -->
+          <button type="button" id="header-login-btn" class="btn btn-primary auth-btn-login" title="Log in to account">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
             </svg>
+            Log In
+          </button>
+
+          <!-- When Logged In: User Profile Badge -->
+          <div id="header-user-badge" class="header-user-badge" hidden title="Click to view profile & stats">
+            <span class="user-avatar-dot"></span>
+            <span id="header-username-display">masiko</span>
+          </div>
+
+          <!-- When Logged In: Dedicated Log Out Button -->
+          <button type="button" id="header-logout-btn" class="btn btn-secondary auth-btn-logout" hidden title="Log out of account">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Log Out
+          </button>
+
+          <!-- Legacy Dropdown Trigger Fallback -->
+          <button type="button" id="header-auth-btn" class="btn btn-secondary auth-trigger-btn" hidden title="Sign in or view user account">
             <span id="header-auth-label">Sign In</span>
           </button>
+
           <div id="auth-user-dropdown" class="auth-user-dropdown" hidden>
             <div class="dropdown-user-header">
               <div class="dropdown-user-name" id="dropdown-user-name">Masiko</div>
@@ -413,9 +414,18 @@
                   <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                   <polyline points="13 2 13 9 20 9"></polyline>
                 </svg>
-                solution.py
+                <span id="editor-filename">solution.py</span>
               </div>
               <span class="cursor-coords" id="cursor-coords-display">Ln 1, Col 1</span>
+
+              <!-- Language Selector in Workspace -->
+              <div class="editor-lang-wrapper">
+                <select id="language-select" class="control-select editor-lang-select" aria-label="Select programming language">
+                  <option value="python">Python 3</option>
+                  <option value="javascript">JavaScript (Node.js)</option>
+                  <option value="cpp">C++ (GCC)</option>
+                </select>
+              </div>
             </div>
 
             <div class="editor-toolbar-right">
@@ -441,6 +451,22 @@
                   <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                 </svg>
                 Annotate
+              </button>
+
+              <!-- Execution Buttons in Workspace -->
+              <button id="run-code-btn" class="btn btn-secondary editor-exec-btn" title="Run current script (Raw Output)">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Run Code
+              </button>
+
+              <button id="run-tests-btn" class="btn btn-primary editor-exec-btn" title="Run problem test suite (Ctrl+Enter)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Run Tests
               </button>
             </div>
           </div>

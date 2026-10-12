@@ -20,6 +20,11 @@ class AuthService {
 
   initElements() {
     // Header triggers
+    this.loginBtn = document.getElementById('header-login-btn');
+    this.logoutBtn = document.getElementById('header-logout-btn');
+    this.userBadge = document.getElementById('header-user-badge');
+    this.usernameDisplay = document.getElementById('header-username-display');
+
     this.authHeaderBtn = document.getElementById('header-auth-btn');
     this.authHeaderLabel = document.getElementById('header-auth-label');
     this.userDropdown = document.getElementById('auth-user-dropdown');
@@ -51,7 +56,29 @@ class AuthService {
   }
 
   bindEvents() {
-    // Header button trigger
+    // Direct Header Log In Button
+    if (this.loginBtn) {
+      this.loginBtn.addEventListener('click', () => {
+        this.openModal('login');
+      });
+    }
+
+    // Direct Header Log Out Button
+    if (this.logoutBtn) {
+      this.logoutBtn.addEventListener('click', () => {
+        this.logout();
+      });
+    }
+
+    // Header User Badge Click (Toggle Stats Dropdown)
+    if (this.userBadge) {
+      this.userBadge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleUserDropdown();
+      });
+    }
+
+    // Legacy Header button trigger fallback
     if (this.authHeaderBtn) {
       this.authHeaderBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -182,24 +209,48 @@ class AuthService {
   }
 
   updateUI() {
-    if (!this.authHeaderLabel) return;
-
     if (this.isAuthenticated()) {
       const displayName = this.user.displayName || this.user.username;
-      this.authHeaderLabel.textContent = displayName;
-      this.authHeaderBtn.classList.add('authenticated');
-      this.authHeaderBtn.title = `Signed in as @${this.user.username}. Click for account options.`;
+      const usernameText = `@${this.user.username}`;
+
+      // Show logged in badge and direct Log Out button; hide Log In button
+      if (this.loginBtn) this.loginBtn.hidden = true;
+      if (this.logoutBtn) this.logoutBtn.hidden = false;
+      if (this.userBadge) {
+        this.userBadge.hidden = false;
+        if (this.usernameDisplay) {
+          this.usernameDisplay.textContent = displayName || usernameText;
+        }
+      }
+
+      if (this.authHeaderLabel) {
+        this.authHeaderLabel.textContent = displayName;
+        if (this.authHeaderBtn) {
+          this.authHeaderBtn.classList.add('authenticated');
+          this.authHeaderBtn.title = `Signed in as ${usernameText}. Click for account options.`;
+        }
+      }
 
       if (this.dropdownUserName) {
         this.dropdownUserName.textContent = displayName;
       }
       if (this.dropdownUserEmail) {
-        this.dropdownUserEmail.textContent = this.user.email || `@${this.user.username}`;
+        this.dropdownUserEmail.textContent = this.user.email || usernameText;
       }
     } else {
-      this.authHeaderLabel.textContent = 'Sign In';
-      this.authHeaderBtn.classList.remove('authenticated');
-      this.authHeaderBtn.title = 'Sign in or register a new account';
+      // Show direct Log In button; hide user badge and direct Log Out button
+      if (this.loginBtn) this.loginBtn.hidden = false;
+      if (this.logoutBtn) this.logoutBtn.hidden = true;
+      if (this.userBadge) this.userBadge.hidden = true;
+
+      if (this.authHeaderLabel) {
+        this.authHeaderLabel.textContent = 'Log In';
+        if (this.authHeaderBtn) {
+          this.authHeaderBtn.classList.remove('authenticated');
+          this.authHeaderBtn.title = 'Sign in or register a new account';
+        }
+      }
+
       if (this.userDropdown) {
         this.userDropdown.hidden = true;
       }
