@@ -16,8 +16,36 @@ try {
   process.exit(1);
 }
 
+const fs = require('fs');
 const http = require('http');
 const path = require('path');
+
+// Auto-load .env file if present in repository root
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  try {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    for (const line of envContent.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx > 0) {
+        const key = trimmed.substring(0, eqIdx).trim();
+        let val = trimmed.substring(eqIdx + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    }
+    console.log('[Config] Auto-loaded environment variables from .env');
+  } catch (err) {
+    console.warn('[Config] Error reading .env file:', err.message);
+  }
+}
+
 const express = require('express');
 const { WebSocketServer } = require('ws');
 const apiRoutes = require('./routes/api');

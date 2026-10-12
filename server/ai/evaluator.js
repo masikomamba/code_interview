@@ -7,7 +7,30 @@ const https = require('https');
 const { EVALUATION_SYSTEM_PROMPT, buildEvaluationUserPrompt } = require('./prompts');
 const { generateHeuristicReport } = require('./heuristics');
 
-const PROVIDER = process.env.AI_EVALUATION_PROVIDER || 'heuristic';
+/**
+ * Auto-detect active AI provider based on environment configuration
+ */
+function getResolvedProvider() {
+  const explicit = (process.env.AI_EVALUATION_PROVIDER || '').trim().toLowerCase();
+  if (explicit && explicit !== 'heuristic') {
+    return explicit;
+  }
+
+  // Auto-detect based on presence of API keys
+  if (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY) {
+    return 'azure';
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return 'openai';
+  }
+  if (process.env.GEMINI_API_KEY) {
+    return 'gemini';
+  }
+  if (process.env.ANTHROPIC_API_KEY) {
+    return 'anthropic';
+  }
+  return 'heuristic';
+}
 
 /**
  * Make HTTPS JSON POST request
@@ -172,9 +195,10 @@ async function callAzureOpenAI(promptText, endpoint, apiKey, deploymentName, api
  */
 async function generateEvaluationReport(sessionData) {
   const userPrompt = buildEvaluationUserPrompt(sessionData);
+  const provider = getResolvedProvider();
 
   // Azure OpenAI Provider
-  if (PROVIDER === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
+  if (provider === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
     try {
       const apiKey = process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY;
       const endpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_ENDPOINT;
@@ -189,38 +213,40 @@ async function generateEvaluationReport(sessionData) {
       report.provider = `Azure OpenAI (${deployment})`;
       return report;
     } catch (err) {
-      console.warn(`[AI Evaluator] Azure OpenAI call failed, falling back to heuristic engine: ${err.message}`);
+      console.error(`[AI Evaluator] Azure OpenAI call failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
-  // If explicit LLM is configured and API key exists
-  if (PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) {
+  // Gemini
+  if (provider === 'gemini' && process.env.GEMINI_API_KEY) {
     try {
       const report = await callGemini(userPrompt, process.env.GEMINI_API_KEY);
       report.provider = 'Gemini 1.5';
       return report;
     } catch (err) {
-      console.warn(`[AI Evaluator] Gemini call failed, falling back to heuristic engine: ${err.message}`);
+      console.error(`[AI Evaluator] Gemini call failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
-  if (PROVIDER === 'openai' && process.env.OPENAI_API_KEY) {
+  // OpenAI
+  if (provider === 'openai' && process.env.OPENAI_API_KEY) {
     try {
       const report = await callOpenAI(userPrompt, process.env.OPENAI_API_KEY);
       report.provider = 'OpenAI';
       return report;
     } catch (err) {
-      console.warn(`[AI Evaluator] OpenAI call failed, falling back to heuristic engine: ${err.message}`);
+      console.error(`[AI Evaluator] OpenAI call failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
-  if (PROVIDER === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
+  // Anthropic
+  if (provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
     try {
       const report = await callAnthropic(userPrompt, process.env.ANTHROPIC_API_KEY);
       report.provider = 'Anthropic Claude';
       return report;
     } catch (err) {
-      console.warn(`[AI Evaluator] Anthropic call failed, falling back to heuristic engine: ${err.message}`);
+      console.error(`[AI Evaluator] Anthropic call failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
@@ -331,28 +357,93 @@ async function callOpenAIChat(messages, apiKey) {
 }
 
 /**
- * Offline heuristic mentor response generator
+ * Responsive offline mentor response generator
  */
-function generateOfflineMentorResponse({ question, problem, code }) {
-  const q = (question || '').toLowerCase();
+function generateOfflineMentorResponse({ question, problem, code, language = 'python' }) {
+  const q = (question || '').toLowerCase().trim();
   const title = problem ? problem.title : 'this problem';
-  const targetTime = problem?.targetComplexity?.time || 'optimal time';
-  const targetSpace = problem?.targetComplexity?.space || 'optimal space';
+  const targetTime = problem?.optimalComplexity?.time || problem?.targetComplexity?.time || 'O(N)';
+  const targetSpace = problem?.optimalComplexity?.space || problem?.targetComplexity?.space || 'O(1)';
   const category = problem?.category || 'Algorithms';
 
-  if (q.includes('hint') || q.includes('clue') || q.includes('stuck') || q.includes('approach')) {
-    return `### Hint for ${title}\n\nThis problem focuses on **${category}**.\n\nKey Strategy:\n- Consider what state you need to remember as you iterate. Can you store elements in a dictionary/hash map or use two pointers to avoid nested O(N^2) loops?\n- Aim for target complexity: **${targetTime}** time and **${targetSpace}** space.\n\nStart by writing down the brute force approach, then eliminate repeated scans.`;
+  // 1. Solution request
+  if (q.includes('solution') || q.includes('answer') || q.includes('full code')) {
+    return `### Editorial Walkthrough for ${title}
+
+To view the complete optimal solution and line-by-line algorithm breakdown, click the **Solution** button in the workspace toolbar above your editor.
+
+Optimal Complexity:
+- Time: \`${targetTime}\`
+- Space: \`${targetSpace}\`
+
+Try sketching the optimal approach before viewing the full solution!`;
   }
 
-  if (q.includes('complexity') || q.includes('big o') || q.includes('runtime') || q.includes('space')) {
-    return `### Complexity Analysis for ${title}\n\n- **Target Time Complexity**: \`${targetTime}\`\n- **Target Space Complexity**: \`${targetSpace}\`\n\nIf your solution uses nested loops over input length N, it runs in O(N^2). Storing seen elements in a hash map gives O(1) lookup and reduces overall time to O(N).`;
+  // 2. Complexity inquiry
+  if (q.includes('complexity') || q.includes('big o') || q.includes('runtime') || q.includes('space') || q.includes('time')) {
+    return `### Complexity Target for ${title}
+
+- **Target Time Complexity**: \`${targetTime}\`
+- **Target Space Complexity**: \`${targetSpace}\`
+- **Core Topic**: ${category}
+
+Technical Guidance:
+- If you use nested loops over an input of size N, the runtime is O(N^2), which usually times out on large test suites.
+- By storing elements in a hash map or dictionary, lookups take O(1) time on average, allowing you to solve this in a single linear pass (\`${targetTime}\`).`;
   }
 
-  if (q.includes('solution') || q.includes('answer') || q.includes('solve')) {
-    return `To review the verified optimal Python solution and full complexity breakdown, click the **Solution** button in the top toolbar to view the editorial walkthrough.`;
+  // 3. Code review / correctness inquiry
+  if (q.includes('my code') || q.includes('correct') || q.includes('review') || q.includes('check') || q.includes('working') || q.includes('fail') || q.includes('error') || q.includes('bug')) {
+    const codeSnippet = (code || '').trim();
+    if (!codeSnippet || codeSnippet.length < 25) {
+      return `### Code Review: Initial Setup
+
+You haven't written much code in the editor yet.
+Here is how to get started on **${title}**:
+1. Check the function arguments and return type.
+2. Initialize your state (e.g. an empty dictionary or pointers).
+3. Loop through the input array once, checking your target condition.
+
+Write your initial draft in the editor and ask me again to inspect your implementation!`;
+    }
+
+    const hasLoop = codeSnippet.includes('for ') || codeSnippet.includes('while ');
+    const hasDict = codeSnippet.includes('{') || codeSnippet.includes('dict(') || codeSnippet.includes('Map(');
+    const hasTwoPointers = codeSnippet.includes('left') || codeSnippet.includes('right') || codeSnippet.includes('low') || codeSnippet.includes('high');
+
+    let observations = [];
+    if (hasLoop) {
+      observations.push('You have an iteration loop in place.');
+    }
+    if (hasDict) {
+      observations.push('You are using a hash map or dictionary to store visited values, which is the key to optimal lookup.');
+    }
+    if (hasTwoPointers) {
+      observations.push('You are using pointer variables to scan boundaries.');
+    }
+
+    return `### Code Inspection for ${title}
+
+${observations.length > 0 ? observations.join(' ') : 'You have started your implementation.'}
+
+Key checkpoints to verify:
+1. **Edge Cases**: Does your code handle empty inputs, single-element inputs, or negative numbers?
+2. **Duplication**: Ensure you do not use the exact same element index twice.
+3. **Execution**: Click **Run Tests** in the toolbar to run your code against the test harness and inspect the terminal output.`;
   }
 
-  return `I am your AI Interview Mentor. You can ask me:\n- *"Can you give me a hint on how to start?"*\n- *"What is the optimal time and space complexity?"*\n- *"How do I improve my current approach?"*\n\nAsk your question and I will guide your problem-solving process.`;
+  // 4. Starting guidance, hint, approach, or default
+  return `### Strategic Hint for ${title} (${category})
+
+**Core Objective**:
+Solve this problem within **${targetTime}** time and **${targetSpace}** space complexity.
+
+**Progressive Guidance**:
+1. **Identify the complement or state**: For each element you visit, determine what matching value or state you need to find.
+2. **Avoid repeated linear scans**: Instead of scanning backwards with an inner loop (which causes O(N^2) slowdown), store seen elements in a hash map.
+3. **Lookup in O(1)**: As you iterate forward, check if your target complement is already in your lookup table. If yes, you found the answer; if no, save the current element.
+
+Write this logic in your editor and click **Run Tests** to verify your solution!`;
 }
 
 /**
@@ -362,7 +453,7 @@ async function askAiMentor({ question, problem, code, language = 'python', chatH
   const promptContext = `CURRENT INTERVIEW CONTEXT:
 Problem: ${problem ? problem.title : 'General Coding'}
 Category: ${problem ? problem.category : 'General'}
-Target Complexity: Time ${problem?.targetComplexity?.time || 'O(N)'}, Space ${problem?.targetComplexity?.space || 'O(1)'}
+Target Complexity: Time ${problem?.optimalComplexity?.time || problem?.targetComplexity?.time || 'O(N)'}, Space ${problem?.optimalComplexity?.space || problem?.targetComplexity?.space || 'O(1)'}
 Language: ${language}
 
 CANDIDATE CURRENT CODE:
@@ -385,8 +476,10 @@ ${question}`;
 
   messages.push({ role: 'user', content: promptContext });
 
+  const provider = getResolvedProvider();
+
   // Azure OpenAI
-  if (PROVIDER === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
+  if (provider === 'azure' && (process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY)) {
     try {
       const apiKey = process.env.AZURE_OPENAI_API_KEY || process.env.AZURE_API_KEY;
       const endpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_ENDPOINT;
@@ -396,34 +489,36 @@ ${question}`;
       if (endpoint) {
         const text = await callAzureChat(messages, endpoint, apiKey, deployment, version);
         return { text, provider: `Azure OpenAI (${deployment})` };
+      } else {
+        console.warn('[AI Mentor] AZURE_OPENAI_ENDPOINT is not defined.');
       }
     } catch (err) {
-      console.warn(`[AI Mentor] Azure chat failed, falling back: ${err.message}`);
+      console.error(`[AI Mentor] Azure chat failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
   // Gemini
-  if (PROVIDER === 'gemini' && process.env.GEMINI_API_KEY) {
+  if (provider === 'gemini' && process.env.GEMINI_API_KEY) {
     try {
       const text = await callGeminiChat(promptContext, process.env.GEMINI_API_KEY);
       return { text, provider: 'Gemini 1.5' };
     } catch (err) {
-      console.warn(`[AI Mentor] Gemini chat failed, falling back: ${err.message}`);
+      console.error(`[AI Mentor] Gemini chat failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
   // OpenAI
-  if (PROVIDER === 'openai' && process.env.OPENAI_API_KEY) {
+  if (provider === 'openai' && process.env.OPENAI_API_KEY) {
     try {
       const text = await callOpenAIChat(messages, process.env.OPENAI_API_KEY);
       return { text, provider: 'OpenAI GPT-4o-mini' };
     } catch (err) {
-      console.warn(`[AI Mentor] OpenAI chat failed, falling back: ${err.message}`);
+      console.error(`[AI Mentor] OpenAI chat failed (${err.message}). Falling back to heuristic engine.`);
     }
   }
 
   // Offline Heuristic Fallback
-  const offlineText = generateOfflineMentorResponse({ question, problem, code });
+  const offlineText = generateOfflineMentorResponse({ question, problem, code, language });
   return { text: offlineText, provider: 'AI Mentor (Offline Engine)' };
 }
 

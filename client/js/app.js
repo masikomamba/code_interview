@@ -462,7 +462,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              question: text.replace(/^@ai\s*/i, ''),
+              question: text.replace(/^@ai\s*/i, '').trim() || 'How do I start solving this problem?',
               problemId: this.currentProblem ? this.currentProblem.id : 'two-sum',
               code: window.editor ? window.editor.getCode() : '',
               language: this.languageSelect ? this.languageSelect.value : 'python'
