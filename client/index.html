@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="styles/curriculum.css">
   <link rel="stylesheet" href="styles/assessment.css">
   <link rel="stylesheet" href="styles/menu.css">
+  <link rel="stylesheet" href="styles/main_menu.css">
 </head>
 <body>
   <div class="app-container">
@@ -21,7 +22,7 @@
     <!-- Top Navigation Bar -->
     <header class="top-nav" role="banner">
       <div class="nav-left">
-        <div class="brand-title">
+        <div class="brand-title" id="nav-brand-title" style="cursor: pointer;" title="Back to Platform Main Menu">
           <span class="brand-dot"></span>
           CODEINTERVIEW
         </div>
@@ -48,14 +49,21 @@
 
         <!-- View Switcher -->
         <div class="nav-view-switcher" role="group" aria-label="Platform Views">
-          <button type="button" id="nav-btn-menu" class="nav-view-btn" title="Open Problem Catalog and Practice Menu">
+          <button type="button" id="nav-btn-home" class="nav-view-btn" title="Open Main Menu Dashboard">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Main Menu
+          </button>
+          <button type="button" id="nav-btn-menu" class="nav-view-btn" title="Open NeetCode 75 Roadmap & Catalog">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="7" height="7"></rect>
               <rect x="14" y="3" width="7" height="7"></rect>
               <rect x="14" y="14" width="7" height="7"></rect>
               <rect x="3" y="14" width="7" height="7"></rect>
             </svg>
-            Problem Menu
+            NeetCode 75
           </button>
           <button type="button" id="nav-btn-workspace" class="nav-view-btn active" title="Open Live Coding Workspace">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -156,7 +164,8 @@
               </div>
             </div>
             <div class="dropdown-divider"></div>
-            <button type="button" id="dropdown-menu-page-btn" class="dropdown-item">Browse Problem Menu</button>
+            <button type="button" id="dropdown-menu-page-btn" class="dropdown-item">Platform Main Menu</button>
+            <button type="button" id="dropdown-roadmap-page-btn" class="dropdown-item">NeetCode 75 Roadmap</button>
             <button type="button" id="dropdown-logout-btn" class="dropdown-item text-danger">Sign Out</button>
           </div>
         </div>
@@ -176,6 +185,408 @@
       <div class="inactivity-banner-right">
         <button type="button" id="practice-now-btn" class="btn btn-secondary" style="background-color: #f59e0b; color: #000; border: none; font-weight: 700;">Practice Now</button>
         <button type="button" id="dismiss-inactivity-btn" class="btn btn-icon" style="background: none; border: none; color: #fbbf24;" aria-label="Dismiss reminder">✕</button>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         Platform Main Menu & Comprehensive Feature Hub Page
+         ==================================================================== -->
+    <div id="view-main-menu-hub" class="main-menu-view" hidden>
+      <div class="main-menu-container">
+
+        <!-- Hero Section -->
+        <div class="mm-hero-card">
+          <div class="mm-hero-content">
+            <div class="mm-tagline-badge">
+              <span class="mm-tagline-dot"></span>
+              Platform Directory : Technical Interview Suite
+            </div>
+            <h1 class="mm-hero-title">Master Technical Coding Interviews</h1>
+            <p class="mm-hero-desc">
+              Everything you need in one place: live collaborative IDE, canonical NeetCode 75 practice roadmap, timed FAANG mock exams, interactive DSA memory models, and real-time AI mentoring.
+            </p>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="mm-quick-actions-bar">
+            <button type="button" id="mm-btn-resume" class="mm-btn-action-primary" title="Return to active coding workspace">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              Resume Workspace
+            </button>
+            <button type="button" id="mm-btn-roadmap" class="mm-btn-action-secondary" title="Browse the NeetCode 75 problem list">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              NeetCode 75 Roadmap
+            </button>
+            <button type="button" id="mm-btn-assessment" class="mm-btn-action-accent" title="Simulate a timed mock interview">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Timed Mock Exam
+            </button>
+            <button type="button" id="mm-btn-academy" class="mm-btn-action-secondary" title="Study visual DSA memory patterns">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+              DSA Academy
+            </button>
+          </div>
+
+          <!-- Hero Stats Row -->
+          <div class="mm-hero-stats-row">
+            <div class="mm-stat-box">
+              <span class="mm-stat-val" id="mm-stat-problems">77</span>
+              <span class="mm-stat-label">Practice Problems</span>
+            </div>
+            <div class="mm-stat-box">
+              <span class="mm-stat-val" id="mm-stat-solved">0</span>
+              <span class="mm-stat-label">Problems Solved</span>
+            </div>
+            <div class="mm-stat-box">
+              <span class="mm-stat-val" id="mm-stat-readiness">0%</span>
+              <span class="mm-stat-label">Readiness Rate</span>
+            </div>
+            <div class="mm-stat-box">
+              <span class="mm-stat-val" id="mm-stat-streak">1 Day</span>
+              <span class="mm-stat-label">Practice Streak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Universal Fast Search Bar -->
+        <div class="mm-search-bar-section">
+          <div class="mm-search-input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="mm-search-input" class="mm-search-input" placeholder="Search any problem, pattern, or data structure (e.g. Two Sum, Dynamic Programming, Graphs, Invert Tree)...">
+            <span class="mm-search-badge">Instant Jump</span>
+          </div>
+          <div id="mm-search-results" class="mm-search-results-overlay" hidden></div>
+        </div>
+
+        <!-- Core Feature Pillars Section -->
+        <div>
+          <div class="mm-section-header">
+            <div class="mm-section-title-wrap">
+              <span class="mm-section-eyebrow">Platform Capabilities</span>
+              <h2 class="mm-section-title">Core Tools & Learning Environments</h2>
+              <p class="mm-section-sub">Comprehensive tools designed for rigorous technical interview preparation.</p>
+            </div>
+          </div>
+
+          <div class="mm-pillars-grid">
+            <!-- Pillar 1: NeetCode 75 Roadmap -->
+            <div class="mm-pillar-card featured">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge blue">Curated 77 Problems</span>
+                </div>
+                <h3 class="mm-pillar-title">NeetCode 75 Roadmap</h3>
+                <p class="mm-pillar-desc">
+                  The definitive collection of 75 canonical interview questions organized by 18 algorithmic patterns with canonical numbering (#1 to #77).
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">Arrays</span>
+                  <span class="mm-pillar-tag">Two Pointers</span>
+                  <span class="mm-pillar-tag">Trees</span>
+                  <span class="mm-pillar-tag">DP</span>
+                  <span class="mm-pillar-tag">Graphs</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="neetcode-roadmap">
+                  Open NeetCode 75 Roadmap
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 2: Live Collaborative Workspace -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="16 18 22 12 16 6"></polyline>
+                      <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge">Interactive IDE</span>
+                </div>
+                <h3 class="mm-pillar-title">Live Coding Workspace</h3>
+                <p class="mm-pillar-desc">
+                  Full Monaco code editor with real-time WebSocket room synchronization, dual Python 3 / JavaScript execution, and unit test runner.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">Python 3</span>
+                  <span class="mm-pillar-tag">JavaScript</span>
+                  <span class="mm-pillar-tag">Test Runner</span>
+                  <span class="mm-pillar-tag">Multi-User</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="workspace">
+                  Launch Workspace
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 3: Timed FAANG Mock Assessments -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon amber">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge amber">Exam Mode</span>
+                </div>
+                <h3 class="mm-pillar-title">Timed Mock Assessments</h3>
+                <p class="mm-pillar-desc">
+                  Simulate high-stakes live interviews under timed pressure (20, 30, 45, or 60 min) with hidden test execution and automated AI scorecards.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">20m Screening</span>
+                  <span class="mm-pillar-tag">45m FAANG</span>
+                  <span class="mm-pillar-tag">Solution Lock</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="timed-assessment">
+                  Start Timed Assessment
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 4: DSA Academy & Mental Models -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge">15 Deep Modules</span>
+                </div>
+                <h3 class="mm-pillar-title">DSA Academy & Theory</h3>
+                <p class="mm-pillar-desc">
+                  Theoretical foundations, visual ASCII memory layouts, common interview traps, complexity trade-offs, and algorithmic patterns.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">Memory Models</span>
+                  <span class="mm-pillar-tag">Mental Models</span>
+                  <span class="mm-pillar-tag">Trade-Offs</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="dsa-academy">
+                  Open DSA Academy
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 5: AI Interview Mentor -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge blue">Staff Engineer AI</span>
+                </div>
+                <h3 class="mm-pillar-title">AI Interview Mentor</h3>
+                <p class="mm-pillar-desc">
+                  Interactive AI coach that provides progressive Socratic hints without spoiling answers, Big-O complexity validation, and code reviews.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">Hints</span>
+                  <span class="mm-pillar-tag">Big-O Audit</span>
+                  <span class="mm-pillar-tag">Code Review</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="ai-mentor">
+                  Chat with AI Mentor
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 6: Collaborative Whiteboard -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge">Visual Canvas</span>
+                </div>
+                <h3 class="mm-pillar-title">Architecture Whiteboard</h3>
+                <p class="mm-pillar-desc">
+                  Draw graph traversals, recursion trees, memory pointer movements, and system architectures with real-time multi-user synchronization.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">Freehand Pen</span>
+                  <span class="mm-pillar-tag">Bounding Boxes</span>
+                  <span class="mm-pillar-tag">Canvas Sync</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="whiteboard">
+                  Open Whiteboard
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 7: Interviewer Scorecard & Rubrics -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 11l3 3L22 4"></path>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge">Evaluation Layer</span>
+                </div>
+                <h3 class="mm-pillar-title">Scorecards & Rubrics</h3>
+                <p class="mm-pillar-desc">
+                  Private interviewer scoring panel with 4-pillar evaluation rubrics (DSA, Problem Solving, Code Quality, Communication) and observation flags.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">4 Rubric Sliders</span>
+                  <span class="mm-pillar-tag">Private Notes</span>
+                  <span class="mm-pillar-tag">Observation Tags</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="interviewer-notes">
+                  View Scorecards
+                </button>
+              </div>
+            </div>
+
+            <!-- Pillar 8: Comprehensive AI Evaluation Report -->
+            <div class="mm-pillar-card">
+              <div class="mm-pillar-top">
+                <div class="mm-pillar-icon-row">
+                  <div class="mm-pillar-icon emerald">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="8" r="7"></circle>
+                      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                    </svg>
+                  </div>
+                  <span class="mm-pillar-badge emerald">AI Analytics</span>
+                </div>
+                <h3 class="mm-pillar-title">Performance Report</h3>
+                <p class="mm-pillar-desc">
+                  Holistic evaluation report generated at session completion with 10-point scoring, algorithmic time complexity analysis, and hire recommendations.
+                </p>
+                <div class="mm-pillar-tags">
+                  <span class="mm-pillar-tag">Radar Chart</span>
+                  <span class="mm-pillar-tag">Complexity Audit</span>
+                  <span class="mm-pillar-tag">Feedback</span>
+                </div>
+              </div>
+              <div class="mm-pillar-bottom">
+                <button type="button" class="mm-pillar-action-btn" data-mm-action="evaluation-report">
+                  Generate Evaluation
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Topic Quick Jump Grid (18 NeetCode 75 Categories) -->
+        <div>
+          <div class="mm-section-header">
+            <div class="mm-section-title-wrap">
+              <span class="mm-section-eyebrow">18 Essential Patterns</span>
+              <h2 class="mm-section-title">Explore by Algorithmic Category</h2>
+              <p class="mm-section-sub">Jump straight to targeted questions in any NeetCode 75 category.</p>
+            </div>
+            <button type="button" class="mm-section-link" id="mm-link-all-topics" onclick="window.mainMenuController && window.mainMenuController.showNeetCodeRoadmap()">
+              View All 77 Questions &rarr;
+            </button>
+          </div>
+
+          <div id="mm-topics-container" class="mm-topics-grid">
+            <!-- Rendered dynamically by main_menu.js -->
+          </div>
+        </div>
+
+        <!-- 4-Step Preparation Roadmap -->
+        <div>
+          <div class="mm-section-header">
+            <div class="mm-section-title-wrap">
+              <span class="mm-section-eyebrow">Recommended Practice Method</span>
+              <h2 class="mm-section-title">Systematic Interview Preparation</h2>
+              <p class="mm-section-sub">A proven 4-stage workflow to master algorithmic interviews efficiently.</p>
+            </div>
+          </div>
+
+          <div class="mm-steps-grid">
+            <div class="mm-step-card">
+              <span class="mm-step-number">1</span>
+              <h4 class="mm-step-title">Study the Pattern</h4>
+              <p class="mm-step-desc">
+                Review data structure fundamentals, memory models, and optimal trade-offs in the DSA Academy before jumping straight into code.
+              </p>
+            </div>
+            <div class="mm-step-card">
+              <span class="mm-step-number">2</span>
+              <h4 class="mm-step-title">Implement in Workspace</h4>
+              <p class="mm-step-desc">
+                Solve the canonical questions in Python or JavaScript and verify edge cases immediately against the built-in test harness.
+              </p>
+            </div>
+            <div class="mm-step-card">
+              <span class="mm-step-number">3</span>
+              <h4 class="mm-step-title">Validate with AI Mentor</h4>
+              <p class="mm-step-desc">
+                Ask the AI Mentor to audit your solution for time/space complexity bottlenecks and potential edge-case failures.
+              </p>
+            </div>
+            <div class="mm-step-card">
+              <span class="mm-step-number">4</span>
+              <h4 class="mm-step-title">Simulate Exam Pressure</h4>
+              <p class="mm-step-desc">
+                Take a 45-minute Timed Assessment with hidden test validation and receive a full AI Staff Engineer scorecard.
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -886,6 +1297,7 @@
   <script src="js/assessment.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/menu.js"></script>
+  <script src="js/main_menu.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -151,11 +151,16 @@ class MenuService {
 
   showMenuView() {
     this.activeView = 'menu';
+    const mainMenuView = document.getElementById('view-main-menu-hub');
+    const btnNavHome = document.getElementById('nav-btn-home');
+
+    if (mainMenuView) mainMenuView.hidden = true;
     if (this.menuView) this.menuView.hidden = false;
     if (this.workspaceGrid) this.workspaceGrid.hidden = true;
 
     if (this.btnNavMenu) this.btnNavMenu.classList.add('active');
     if (this.btnNavWorkspace) this.btnNavWorkspace.classList.remove('active');
+    if (btnNavHome) btnNavHome.classList.remove('active');
 
     this.updateStats();
     this.renderProblemGrid();
@@ -164,11 +169,16 @@ class MenuService {
 
   showWorkspaceView() {
     this.activeView = 'workspace';
+    const mainMenuView = document.getElementById('view-main-menu-hub');
+    const btnNavHome = document.getElementById('nav-btn-home');
+
+    if (mainMenuView) mainMenuView.hidden = true;
     if (this.menuView) this.menuView.hidden = true;
     if (this.workspaceGrid) this.workspaceGrid.hidden = false;
 
     if (this.btnNavWorkspace) this.btnNavWorkspace.classList.add('active');
     if (this.btnNavMenu) this.btnNavMenu.classList.remove('active');
+    if (btnNavHome) btnNavHome.classList.remove('active');
   }
 
   resetAllFilters() {

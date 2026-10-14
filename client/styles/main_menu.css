@@ -1,0 +1,671 @@
+/* ==========================================================================
+   CODEINTERVIEW PLATFORM: MAIN MENU HUB & WEBSITE DIRECTORY STYLES
+   High-Contrast Dark Theme - Zero Emojis - Zero Em Dashes
+   ========================================================================== */
+
+.main-menu-view {
+  width: 100%;
+  height: calc(100vh - var(--header-height, 52px));
+  background-color: #080c14;
+  color: var(--text-primary, #f1f5f9);
+  padding: 28px 36px 64px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.main-menu-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* --------------------------------------------------------------------------
+   Hero Section
+   -------------------------------------------------------------------------- */
+.mm-hero-card {
+  position: relative;
+  background: linear-gradient(180deg, #131c31 0%, #0d1527 100%);
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-lg, 12px);
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.mm-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #f59e0b 100%);
+}
+
+.mm-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 860px;
+}
+
+.mm-tagline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.mm-tagline-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.mm-hero-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.mm-hero-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Hero Quick Actions */
+.mm-quick-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-top: 6px;
+}
+
+.mm-btn-action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: 1px solid #3b82f6;
+  border-radius: var(--radius-sm, 6px);
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.mm-btn-action-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #60a5fa;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.mm-btn-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: var(--radius-sm, 6px);
+  padding: 10px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.mm-btn-action-secondary:hover {
+  background-color: #334155;
+  border-color: #475569;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.mm-btn-action-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-sm, 6px);
+  padding: 10px 18px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mm-btn-action-accent:hover {
+  background-color: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+  color: #fef3c7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+/* Hero Stats Row */
+.mm-hero-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #1e293b;
+}
+
+.mm-stat-box {
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-sm, 6px);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mm-stat-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-mono, monospace);
+  line-height: 1.2;
+}
+
+.mm-stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   Search & Quick Jump Bar
+   -------------------------------------------------------------------------- */
+.mm-search-bar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mm-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: #131c31;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 18px;
+  gap: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.mm-search-input-wrap:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.mm-search-input-wrap svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.mm-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-family: var(--font-sans, sans-serif);
+}
+
+.mm-search-input::placeholder {
+  color: #64748b;
+}
+
+.mm-search-badge {
+  font-size: 0.7rem;
+  font-family: var(--font-mono, monospace);
+  color: #64748b;
+  background-color: #0f172a;
+  border: 1px solid #1e293b;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.mm-search-results-overlay {
+  background-color: #131c31;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md, 8px);
+  max-height: 380px;
+  overflow-y: auto;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+
+.mm-search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #1e293b;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.mm-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.mm-search-result-item:hover {
+  background-color: #1e293b;
+}
+
+.mm-search-res-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mm-search-res-cat {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   Section Headers
+   -------------------------------------------------------------------------- */
+.mm-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.mm-section-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mm-section-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #3b82f6;
+}
+
+.mm-section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.mm-section-sub {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.mm-section-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #60a5fa;
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.mm-section-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Core Pillars Grid (8 Primary Cards)
+   -------------------------------------------------------------------------- */
+.mm-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 20px;
+}
+
+.mm-pillar-card {
+  background-color: #131c31;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-md, 8px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mm-pillar-card:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.mm-pillar-card.featured {
+  background: linear-gradient(180deg, #16223d 0%, #111a2d 100%);
+  border-color: #2563eb;
+}
+
+.mm-pillar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mm-pillar-icon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mm-pillar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.mm-pillar-icon.amber {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.mm-pillar-icon.emerald {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.mm-pillar-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+
+.mm-pillar-badge.blue {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.mm-pillar-badge.amber {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.mm-pillar-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.mm-pillar-desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.mm-pillar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.mm-pillar-tag {
+  font-size: 0.68rem;
+  font-family: var(--font-mono, monospace);
+  padding: 2px 7px;
+  border-radius: 3px;
+  background-color: #0f172a;
+  color: #cbd5e1;
+  border: 1px solid #1e293b;
+}
+
+.mm-pillar-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid #1e293b;
+}
+
+.mm-pillar-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: var(--radius-xs, 4px);
+  padding: 7px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.mm-pillar-action-btn:hover {
+  background-color: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.mm-pillar-card.featured .mm-pillar-action-btn {
+  background-color: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.mm-pillar-card.featured .mm-pillar-action-btn:hover {
+  background-color: #1d4ed8;
+  border-color: #60a5fa;
+}
+
+/* --------------------------------------------------------------------------
+   NeetCode 75 Topic Quick Jump Grid (18 Categories)
+   -------------------------------------------------------------------------- */
+.mm-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.mm-topic-card {
+  background-color: #131c31;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-sm, 6px);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mm-topic-card:hover {
+  border-color: #3b82f6;
+  background-color: #17223b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mm-topic-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mm-topic-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.mm-topic-count {
+  font-size: 0.72rem;
+  font-family: var(--font-mono, monospace);
+  color: #60a5fa;
+  background-color: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.mm-topic-sample {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   How to Prepare Walkthrough Steps
+   -------------------------------------------------------------------------- */
+.mm-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.mm-step-card {
+  background-color: #131c31;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-md, 8px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.mm-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #1e293b;
+  color: #60a5fa;
+  border: 1px solid #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+}
+
+.mm-step-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.mm-step-desc {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Adjustments
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .main-menu-view {
+    padding: 20px 16px 60px 16px;
+  }
+
+  .mm-hero-card {
+    padding: 24px 20px;
+  }
+
+  .mm-hero-title {
+    font-size: 1.6rem;
+  }
+
+  .mm-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mm-topics-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}

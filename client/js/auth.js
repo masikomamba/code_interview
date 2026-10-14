@@ -142,7 +142,21 @@ class AuthService {
     if (this.dropdownMenuPageBtn) {
       this.dropdownMenuPageBtn.addEventListener('click', () => {
         if (this.userDropdown) this.userDropdown.hidden = true;
-        if (window.menuService) {
+        if (window.mainMenuController) {
+          window.mainMenuController.showMainMenu();
+        } else if (window.menuService) {
+          window.menuService.showMenuView();
+        }
+      });
+    }
+
+    const roadmapBtn = document.getElementById('dropdown-roadmap-page-btn');
+    if (roadmapBtn) {
+      roadmapBtn.addEventListener('click', () => {
+        if (this.userDropdown) this.userDropdown.hidden = true;
+        if (window.mainMenuController) {
+          window.mainMenuController.showNeetCodeRoadmap();
+        } else if (window.menuService) {
           window.menuService.showMenuView();
         }
       });
