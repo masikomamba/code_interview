@@ -101,7 +101,11 @@ class AssessmentManager {
 
   populateProblemList() {
     if (!this.problemSelect) return;
-    this.problemSelect.innerHTML = '<option value="current">Current Selected Problem</option><option value="random">Random LeetCode Problem</option>';
+    this.problemSelect.innerHTML = `
+      <option value="current">Current Selected Problem</option>
+      <option value="random-nc75">Random NeetCode 75 Problem</option>
+      <option value="random">Random Practice Problem</option>
+    `;
 
     fetch('/api/problems')
       .then(res => res.json())
@@ -110,7 +114,8 @@ class AssessmentManager {
         problems.forEach(p => {
           const opt = document.createElement('option');
           opt.value = p.id;
-          opt.textContent = `${p.title} (${p.difficulty})`;
+          const prefix = (p.isNeetCode75 && p.neetcodeOrder) ? `#${p.neetcodeOrder} ` : '';
+          opt.textContent = `${prefix}${p.title} (${p.difficulty})`;
           this.problemSelect.appendChild(opt);
         });
       })
@@ -138,6 +143,11 @@ class AssessmentManager {
     let chosenProblemId = this.problemSelect ? this.problemSelect.value : 'current';
     if (chosenProblemId === 'current') {
       chosenProblemId = window.currentProblemId || 'two-sum';
+    } else if (chosenProblemId === 'random-nc75' && this.allProblems && this.allProblems.length > 0) {
+      const ncList = this.allProblems.filter(p => p.isNeetCode75);
+      const pool = ncList.length > 0 ? ncList : this.allProblems;
+      const rand = pool[Math.floor(Math.random() * pool.length)];
+      chosenProblemId = rand.id;
     } else if (chosenProblemId === 'random' && this.allProblems && this.allProblems.length > 0) {
       const rand = this.allProblems[Math.floor(Math.random() * this.allProblems.length)];
       chosenProblemId = rand.id;

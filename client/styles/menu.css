@@ -839,3 +839,57 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --------------------------------------------------------------------------
+   NeetCode 75 Badge and Collection Selector
+   -------------------------------------------------------------------------- */
+.card-neetcode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background-color: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+}
+
+.menu-collection-tabs {
+  display: inline-flex;
+  align-items: center;
+  background-color: #0b0f17;
+  border: 1px solid #1f2937;
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.menu-collection-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  border-radius: var(--radius-xs);
+  padding: 6px 14px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.menu-collection-tab:hover {
+  color: #f8fafc;
+}
+
+.menu-collection-tab.active {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+

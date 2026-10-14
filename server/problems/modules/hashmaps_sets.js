@@ -407,6 +407,265 @@ rl.on('line', (line) => {
     return longest_streak`,
         explanation: `Converting nums to a hash set provides O(1) membership checks. We only attempt to build a sequence if num - 1 is not in the set, ensuring each sequence is traversed only once. Total operations are bounded by 2N, achieving O(N) time with O(N) space.`
       }
+    },
+    {
+      id: 'contains-duplicate',
+      title: 'Contains Duplicate',
+      difficulty: 'Easy',
+      category: 'Hash Maps & Sets',
+      neetcodeCategory: 'Arrays & Hashing',
+      neetcodeOrder: 1,
+      isNeetCode75: true,
+      description: `Given an integer array \`nums\`, return \`true\` if any value appears **at least twice** in the array, and return \`false\` if every element is distinct.
+
+### Example 1:
+\`\`\`
+Input: nums = [1,2,3,1]
+Output: true
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: nums = [1,2,3,4]
+Output: false
+\`\`\`
+
+### Example 3:
+\`\`\`
+Input: nums = [1,1,1,3,3,4,3,2,4,2]
+Output: true
+\`\`\`
+
+### Constraints:
+* 1 <= nums.length <= 10^5
+* -10^9 <= nums[i] <= 10^9`,
+      optimalComplexity: { time: 'O(N)', space: 'O(N)' },
+      starterCode: {
+        python: `def contains_duplicate(nums):
+    # Use hash set to check for duplicates
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(contains_duplicate(d['nums'])))
+`,
+        javascript: `function containsDuplicate(nums) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(containsDuplicate(data.nums)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Duplicate present: [1, 2, 3, 1]', input: '{"nums": [1, 2, 3, 1]}', expected: 'true', isHidden: false },
+        { id: 'tc-2', description: 'All unique elements: [1, 2, 3, 4]', input: '{"nums": [1, 2, 3, 4]}', expected: 'false', isHidden: false },
+        { id: 'tc-3', description: 'Multiple repeats', input: '{"nums": [1, 1, 1, 3, 3, 4, 3, 2, 4, 2]}', expected: 'true', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def contains_duplicate(nums):
+    seen = set()
+    for num in nums:
+        if num in seen:
+            return True
+        seen.add(num)
+    return False`,
+        explanation: `By maintaining a hash set of visited values, each lookup and insertion takes O(1) on average. As soon as we encounter a number already in the set, we return True immediately. Runs in O(N) time and O(N) space.`
+      }
+    },
+    {
+      id: 'product-except-self',
+      title: 'Product of Array Except Self',
+      difficulty: 'Medium',
+      category: 'Hash Maps & Sets',
+      neetcodeCategory: 'Arrays & Hashing',
+      neetcodeOrder: 6,
+      isNeetCode75: true,
+      description: `Given an integer array \`nums\`, return an array \`answer\` such that \`answer[i]\` is equal to the product of all the elements of \`nums\` except \`nums[i]\`.
+
+The product of any prefix or suffix of \`nums\` is guaranteed to fit in a **32-bit** integer.
+
+You must write an algorithm that runs in **O(n)** time and without using the division operation.
+
+### Example 1:
+\`\`\`
+Input: nums = [1,2,3,4]
+Output: [24,12,8,6]
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: nums = [-1,1,0,-3,3]
+Output: [0,0,9,0,0]
+\`\`\`
+
+### Constraints:
+* 2 <= nums.length <= 10^5
+* -30 <= nums[i] <= 30
+* Do not use the division operation.`,
+      optimalComplexity: { time: 'O(N)', space: 'O(1) auxiliary space (excluding output array)' },
+      starterCode: {
+        python: `def product_except_self(nums):
+    # Calculate prefix and suffix products in two passes
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(product_except_self(d['nums'])))
+`,
+        javascript: `function productExceptSelf(nums) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(productExceptSelf(data.nums)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Standard array: [1, 2, 3, 4]', input: '{"nums": [1, 2, 3, 4]}', expected: '[24, 12, 8, 6]', isHidden: false },
+        { id: 'tc-2', description: 'Array with single zero', input: '{"nums": [-1, 1, 0, -3, 3]}', expected: '[0, 0, 9, 0, 0]', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def product_except_self(nums):
+    n = len(nums)
+    res = [1] * n
+
+    prefix = 1
+    for i in range(n):
+        res[i] = prefix
+        prefix *= nums[i]
+
+    postfix = 1
+    for i in range(n - 1, -1, -1):
+        res[i] *= postfix
+        postfix *= nums[i]
+
+    return res`,
+        explanation: `In the first forward pass, res[i] stores the cumulative prefix product of all elements to the left of i. In the second backward pass, a running postfix multiplier scales res[i] by the product of all elements to the right of i. Avoids division and runs in O(N) time with O(1) extra space.`
+      }
+    },
+    {
+      id: 'encode-decode-strings',
+      title: 'Encode and Decode Strings',
+      difficulty: 'Medium',
+      category: 'Hash Maps & Sets',
+      neetcodeCategory: 'Arrays & Hashing',
+      neetcodeOrder: 7,
+      isNeetCode75: true,
+      description: `Design an algorithm to encode a list of strings to a string. The encoded string is then sent over the network and is decoded back to the original list of strings.
+
+Please implement \`encode\` and \`decode\`.
+
+### Example 1:
+\`\`\`
+Input: ["neet","code","love","you"]
+Output: ["neet","code","love","you"]
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: ["we","say",":","yes"]
+Output: ["we","say",":","yes"]
+\`\`\`
+
+### Constraints:
+* 0 <= strs.length < 100
+* 0 <= strs[i].length < 200
+* strs[i] contains any possible characters out of 256 valid ASCII characters.`,
+      optimalComplexity: { time: 'O(N)', space: 'O(1) extra space' },
+      starterCode: {
+        python: `def encode(strs):
+    # Length-prefixed string encoding
+    pass
+
+def decode(s):
+    # Decode length-prefixed string
+    pass
+
+def round_trip(strs):
+    return decode(encode(strs))
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(round_trip(d['strs'])))
+`,
+        javascript: `function encode(strs) {
+    let res = '';
+    for (const s of strs) {
+        res += s.length + '#' + s;
+    }
+    return res;
+}
+
+function decode(s) {
+    const res = [];
+    let i = 0;
+    while (i < s.length) {
+        const j = s.indexOf('#', i);
+        const len = parseInt(s.substring(i, j), 10);
+        res.push(s.substring(j + 1, j + 1 + len));
+        i = j + 1 + len;
+    }
+    return res;
+}
+
+function roundTrip(strs) {
+    return decode(encode(strs));
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(roundTrip(data.strs)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Standard word list', input: '{"strs": ["neet", "code", "love", "you"]}', expected: '["neet", "code", "love", "you"]', isHidden: false },
+        { id: 'tc-2', description: 'Delimiter inside string', input: '{"strs": ["we", "say", ":", "yes"]}', expected: '["we", "say", ":", "yes"]', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def encode(strs):
+    res = ""
+    for s in strs:
+        res += f"{len(s)}#{s}"
+    return res
+
+def decode(s):
+    res = []
+    i = 0
+    while i < len(s):
+        j = s.find('#', i)
+        length = int(s[i:j])
+        res.append(s[j + 1 : j + 1 + length])
+        i = j + 1 + length
+    return res`,
+        explanation: `We encode each string using length-prefix framing: length + '#' + string. Even if the string contains '#' or digits, we read up to the '#' delimiter to know exactly how many subsequent characters belong to the string payload. O(N) time and handles arbitrary characters.`
+      }
     }
   ]
 };

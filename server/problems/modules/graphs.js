@@ -518,6 +518,295 @@ rl.on('line', (line) => {
     return [list(coord) for coord in (pacific & atlantic)]`,
         explanation: `Instead of checking if water flows down from each cell, we work backwards: water flows upwards (heights[nr][nc] >= heights[r][c]) from the ocean borders inward. Cells reachable from both Pacific and Atlantic borders (the intersection of both visited sets) can flow to both oceans. Time: O(M * N), Space: O(M * N).`
       }
+    },
+    {
+      id: 'graph-valid-tree',
+      title: 'Graph Valid Tree',
+      difficulty: 'Medium',
+      category: 'Graphs & BFS/DFS',
+      neetcodeCategory: 'Graphs',
+      neetcodeOrder: 48,
+      isNeetCode75: true,
+      description: `Given \`n\` nodes labeled from \`0\` to \`n - 1\` and a list of undirected edges (each edge is a pair of nodes), write a function to check whether these edges make up a **valid tree**.
+
+A valid tree must satisfy two conditions:
+1. It contains no cycles.
+2. All nodes are connected into a single connected component (edges count must be exactly \`n - 1\`).
+
+### Example 1:
+\`\`\`
+Input: n = 5, edges = [[0,1],[0,2],[0,3],[1,4]]
+Output: true
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: n = 5, edges = [[0,1],[1,2],[2,3],[1,3],[1,4]]
+Output: false
+\`\`\`
+
+### Constraints:
+* 1 <= n <= 2000
+* 0 <= edges.length <= 5000
+* edges[i].length == 2
+* 0 <= a_i, b_i < n
+* a_i != b_i
+* There are no self-loops or repeated edges.`,
+      optimalComplexity: { time: 'O(V + E)', space: 'O(V + E)' },
+      starterCode: {
+        python: `def valid_tree(n, edges) -> bool:
+    # A tree of n nodes must have exactly n - 1 edges and be fully connected
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(valid_tree(d['n'], d['edges'])))
+`,
+        javascript: `function validTree(n, edges) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(validTree(data.n, data.edges)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Valid tree with 5 nodes', input: '{"n": 5, "edges": [[0,1],[0,2],[0,3],[1,4]]}', expected: 'true', isHidden: false },
+        { id: 'tc-2', description: 'Graph with cycle', input: '{"n": 5, "edges": [[0,1],[1,2],[2,3],[1,3],[1,4]]}', expected: 'false', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def valid_tree(n, edges) -> bool:
+    if len(edges) != n - 1:
+        return False
+
+    adj = {i: [] for i in range(n)}
+    for u, v in edges:
+        adj[u].append(v)
+        adj[v].append(u)
+
+    visited = set()
+
+    def dfs(node, parent):
+        visited.add(node)
+        for neighbor in adj[node]:
+            if neighbor == parent:
+                continue
+            if neighbor in visited or not dfs(neighbor, node):
+                return False
+        return True
+
+    return dfs(0, -1) and len(visited) == n`,
+        explanation: `A graph is a valid tree if and only if it has exactly n - 1 edges and is connected without cycles. By verifying len(edges) == n - 1 upfront, we only need to confirm that a DFS traversal from node 0 visits all n vertices without encountering a previously visited node other than the direct parent. O(V + E) time.`
+      }
+    },
+    {
+      id: 'connected-components-count',
+      title: 'Number of Connected Components in an Undirected Graph',
+      difficulty: 'Medium',
+      category: 'Graphs & BFS/DFS',
+      neetcodeCategory: 'Graphs',
+      neetcodeOrder: 49,
+      isNeetCode75: true,
+      description: `You have a graph of \`n\` nodes. You are given an integer \`n\` and an array \`edges\` where \`edges[i] = [a_i, b_i]\` indicates that there is an edge between \`a_i\` and \`b_i\` in the graph.
+
+Return the number of connected components in the graph.
+
+### Example 1:
+\`\`\`
+Input: n = 5, edges = [[0,1],[1,2],[3,4]]
+Output: 2
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: n = 5, edges = [[0,1],[1,2],[2,3],[3,4]]
+Output: 1
+\`\`\`
+
+### Constraints:
+* 1 <= n <= 2000
+* 1 <= edges.length <= 5000
+* edges[i].length == 2
+* 0 <= a_i <= b_i < n
+* a_i != b_i
+* There are no repeated edges.`,
+      optimalComplexity: { time: 'O(V + E * alpha(V)) with Union-Find', space: 'O(V)' },
+      starterCode: {
+        python: `def count_components(n, edges) -> int:
+    # Use Disjoint Set Union (Union-Find) or BFS/DFS
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(count_components(d['n'], d['edges'])))
+`,
+        javascript: `function countComponents(n, edges) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(countComponents(data.n, data.edges)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Two disjoint components: {0,1,2} and {3,4}', input: '{"n": 5, "edges": [[0,1],[1,2],[3,4]]}', expected: '2', isHidden: false },
+        { id: 'tc-2', description: 'Single connected line', input: '{"n": 5, "edges": [[0,1],[1,2],[2,3],[3,4]]}', expected: '1', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def count_components(n, edges) -> int:
+    parent = list(range(n))
+    rank = [1] * n
+
+    def find(p):
+        while p != parent[p]:
+            parent[p] = parent[parent[p]] # Path compression
+            p = parent[p]
+        return p
+
+    def union(n1, n2):
+        p1, p2 = find(n1), find(n2)
+        if p1 == p2:
+            return 0
+        if rank[p1] > rank[p2]:
+            parent[p2] = p1
+            rank[p1] += rank[p2]
+        else:
+            parent[p1] = p2
+            rank[p2] += rank[p1]
+        return 1
+
+    components = n
+    for u, v in edges:
+        components -= union(u, v)
+
+    return components`,
+        explanation: `We initialize n separate components. For each edge (u, v), we perform a Union operation with path compression. If u and v belong to different disjoint sets, merging them decrements the component count by 1. Runs in near-linear O(V + E * alpha(V)) time and O(V) space.`
+      }
+    },
+    {
+      id: 'alien-dictionary',
+      title: 'Alien Dictionary',
+      difficulty: 'Hard',
+      category: 'Graphs & BFS/DFS',
+      neetcodeCategory: 'Advanced Graphs',
+      neetcodeOrder: 50,
+      isNeetCode75: true,
+      description: `There is a new alien language that uses the English alphabet. However, the order of the letters is unknown to you.
+
+You are given a list of strings \`words\` from the alien language's dictionary, where the strings in \`words\` are **sorted lexicographically** by the rules of this new language.
+
+Return a string of the unique letters in the new alien language sorted in **lexicographically increasing order** by the new language's rules. If there is no solution, return \`""\`. If there are multiple solutions, return **any of them**.
+
+### Example 1:
+\`\`\`
+Input: words = ["wrt","wrf","er","ett","rftt"]
+Output: "wertf"
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: words = ["z","x"]
+Output: "zx"
+\`\`\`
+
+### Example 3:
+\`\`\`
+Input: words = ["z","x","z"]
+Output: ""
+Explanation: The order is invalid, so return "".
+\`\`\`
+
+### Constraints:
+* 1 <= words.length <= 100
+* 1 <= words[i].length <= 100
+* \`words[i]\` consists of only lowercase English letters.`,
+      optimalComplexity: { time: 'O(Total Characters + |V| + |E|)', space: 'O(|V| + |E|)' },
+      starterCode: {
+        python: `def alien_order(words):
+    # Build directed graph from adjacent words differences and perform topological sort
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(alien_order(d['words'])))
+`,
+        javascript: `function alienOrder(words) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(alienOrder(data.words)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Valid 5-character alphabet order', input: '{"words": ["wrt","wrf","er","ett","rftt"]}', expected: '"wertf"', isHidden: false },
+        { id: 'tc-2', description: 'Two word pair', input: '{"words": ["z","x"]}', expected: '"zx"', isHidden: false },
+        { id: 'tc-3', description: 'Cycle detected: z -> x -> z', input: '{"words": ["z","x","z"]}', expected: '""', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def alien_order(words):
+    adj = {c: set() for w in words for c in w}
+
+    for i in range(len(words) - 1):
+        w1, w2 = words[i], words[i + 1]
+        min_len = min(len(w1), len(w2))
+        # Prefix rule: longer word cannot precede shorter word if prefixes are equal
+        if len(w1) > len(w2) and w1[:min_len] == w2[:min_len]:
+            return ""
+        for j in range(min_len):
+            if w1[j] != w2[j]:
+                adj[w1[j]].add(w2[j])
+                break
+
+    visited = {} # False = visited in current branch, True = fully processed
+    res = []
+
+    def dfs(c):
+        if c in visited:
+            return visited[c]
+        visited[c] = True # Mark visiting
+        for neighbor in adj[c]:
+            if dfs(neighbor):
+                return True # Cycle detected
+        visited[c] = False # Mark finished
+        res.append(c)
+        return False
+
+    for c in list(adj.keys()):
+        if dfs(c):
+            return ""
+
+    res.reverse()
+    return "".join(res)`,
+        explanation: `We compare each adjacent pair of dictionary words. The first mismatched character defines a directed edge w1[j] -> w2[j]. If w1 is a strict prefix of w2 and longer, the dictionary is invalid. Post-order DFS topological sort with 3-state cycle detection produces the topological ordering in O(Total Characters) time.`
+      }
     }
   ]
 };

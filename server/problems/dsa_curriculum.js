@@ -16,19 +16,27 @@ const binarySearch = require('./modules/binary_search');
 const graphs = require('./modules/graphs');
 const dynamicProgramming = require('./modules/dynamic_programming');
 const intervalsGreedy = require('./modules/intervals_greedy');
+const tries = require('./modules/tries');
+const backtracking = require('./modules/backtracking');
+const mathGeometry = require('./modules/math_geometry');
+const bitManipulation = require('./modules/bit_manipulation');
 
 const DSA_CURRICULUM = [
-  arraysTwoPointers,
   hashmapsSets,
+  arraysTwoPointers,
   slidingWindow,
   stacksQueues,
+  binarySearch,
   linkedLists,
   treesBst,
+  tries,
   heapsPriorityQueues,
-  binarySearch,
+  backtracking,
   graphs,
   dynamicProgramming,
-  intervalsGreedy
+  intervalsGreedy,
+  mathGeometry,
+  bitManipulation
 ];
 
 module.exports = {

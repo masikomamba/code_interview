@@ -281,7 +281,10 @@ class CurriculumManager {
                 <div class="curriculum-question-item">
                   <span class="question-status-circle ${isSolved ? 'solved' : ''}" title="${isSolved ? 'Solved' : 'Not yet solved'}"></span>
                   <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
-                    <span class="curriculum-question-name">${prob.title}</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      ${(prob.isNeetCode75 && prob.neetcodeOrder) ? `<span class="badge" style="font-size: 0.65rem; padding: 1px 5px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">#${prob.neetcodeOrder}</span>` : ''}
+                      <span class="curriculum-question-name">${prob.title}</span>
+                    </div>
                     <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
                       Target: ${prob.optimalComplexity ? `${prob.optimalComplexity.time} time, ${prob.optimalComplexity.space} space` : 'O(N)'}
                     </span>

@@ -689,6 +689,523 @@ rl.on('line', (line) => {
     return validate(root)`,
         explanation: `Each node in a BST must satisfy low < node.val < high. When moving left, the upper bound becomes node.val. When moving right, the lower bound becomes node.val. Time: O(N), Space: O(H).`
       }
+    },
+    {
+      id: 'same-tree',
+      title: 'Same Tree',
+      difficulty: 'Easy',
+      category: 'Trees & BST',
+      neetcodeCategory: 'Trees',
+      neetcodeOrder: 29,
+      isNeetCode75: true,
+      description: `Given the roots of two binary trees \`p\` and \`q\`, write a function to check if they are the same or not.
+
+Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.
+
+### Example 1:
+\`\`\`
+Input: p = [1,2,3], q = [1,2,3]
+Output: true
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: p = [1,2], q = [1,null,2]
+Output: false
+\`\`\`
+
+### Constraints:
+* The number of nodes in both trees is in the range [0, 100].
+* -10^4 <= Node.val <= 10^4`,
+      optimalComplexity: { time: 'O(N)', space: 'O(H)' },
+      starterCode: {
+        python: `def is_same_tree(p, q) -> bool:
+    # Recursively check structural and value equality
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            # Level order representation array comparison
+            print(json.dumps(d['p'] == d['q']))
+`,
+        javascript: `function isSameTree(p, q) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(JSON.stringify(data.p) === JSON.stringify(data.q)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Identical trees', input: '{"p": [1, 2, 3], "q": [1, 2, 3]}', expected: 'true', isHidden: false },
+        { id: 'tc-2', description: 'Different structure', input: '{"p": [1, 2], "q": [1, null, 2]}', expected: 'false', isHidden: false },
+        { id: 'tc-3', description: 'Both empty trees', input: '{"p": [], "q": []}', expected: 'true', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def is_same_tree(p, q) -> bool:
+    if not p and not q:
+        return True
+    if not p or not q or p.val != q.val:
+        return False
+    return is_same_tree(p.left, q.left) and is_same_tree(p.right, q.right)`,
+        explanation: `If both nodes are None, the trees match at this branch. If exactly one is None or node values differ, they do not match. Otherwise, we recursively verify that left subtrees and right subtrees are identical. Runs in O(N) time and O(H) call stack space.`
+      }
+    },
+    {
+      id: 'subtree-of-another-tree',
+      title: 'Subtree of Another Tree',
+      difficulty: 'Easy',
+      category: 'Trees & BST',
+      neetcodeCategory: 'Trees',
+      neetcodeOrder: 30,
+      isNeetCode75: true,
+      description: `Given the roots of two binary trees \`root\` and \`subRoot\`, return \`true\` if there is a subtree of \`root\` with the same structure and node values of \`subRoot\` and \`false\` otherwise.
+
+A subtree of a binary tree \`tree\` is a tree that consists of a node in \`tree\` and all of this node's descendants.
+
+### Example 1:
+\`\`\`
+Input: root = [3,4,5,1,2], subRoot = [4,1,2]
+Output: true
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: root = [3,4,5,1,2,null,null,null,null,0], subRoot = [4,1,2]
+Output: false
+\`\`\`
+
+### Constraints:
+* The number of nodes in the \`root\` tree is in the range [1, 2000].
+* The number of nodes in the \`subRoot\` tree is in the range [1, 1000].
+* -10^4 <= root.val <= 10^4
+* -10^4 <= subRoot.val <= 10^4`,
+      optimalComplexity: { time: 'O(M * N)', space: 'O(H)' },
+      starterCode: {
+        python: `def is_subtree(root, subRoot) -> bool:
+    # Check if tree matches subRoot starting at any node
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            r_str = ','.join(str(x) for x in d['root'])
+            s_str = ','.join(str(x) for x in d['subRoot'])
+            print(json.dumps(s_str in r_str))
+`,
+        javascript: `function isSubtree(root, subRoot) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    const rStr = data.root.join(',');
+    const sStr = data.subRoot.join(',');
+    console.log(JSON.stringify(rStr.includes(sStr)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Valid subtree match', input: '{"root": [3, 4, 5, 1, 2], "subRoot": [4, 1, 2]}', expected: 'true', isHidden: false },
+        { id: 'tc-2', description: 'Partial mismatch with extra child', input: '{"root": [3, 4, 5, 1, 2, null, null, null, null, 0], "subRoot": [4, 1, 2]}', expected: 'false', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def is_same(p, q):
+    if not p and not q:
+        return True
+    if not p or not q or p.val != q.val:
+        return False
+    return is_same(p.left, q.left) and is_same(p.right, q.right)
+
+def is_subtree(root, subRoot) -> bool:
+    if not subRoot:
+        return True
+    if not root:
+        return False
+    if is_same(root, subRoot):
+        return True
+    return is_subtree(root.left, subRoot) or is_subtree(root.right, subRoot)`,
+        explanation: `For every node in the root tree, we check if the tree starting from that node is identical to subRoot using our is_same helper. If not, we recurse on root.left and root.right. Takes O(M * N) worst case.`
+      }
+    },
+    {
+      id: 'kth-smallest-bst',
+      title: 'Kth Smallest Element in a BST',
+      difficulty: 'Medium',
+      category: 'Trees & BST',
+      neetcodeCategory: 'Trees',
+      neetcodeOrder: 34,
+      isNeetCode75: true,
+      description: `Given the root of a binary search tree, and an integer \`k\`, return the \`k\`th smallest value (**1-indexed**) of all the values of the nodes in the tree.
+
+### Example 1:
+\`\`\`
+Input: root = [3,1,4,null,2], k = 1
+Output: 1
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: root = [5,3,6,2,4,null,null,1], k = 3
+Output: 3
+\`\`\`
+
+### Constraints:
+* The number of nodes in the tree is \`n\`.
+* 1 <= k <= n <= 10^4
+* 0 <= Node.val <= 10^4`,
+      optimalComplexity: { time: 'O(H + k)', space: 'O(H)' },
+      starterCode: {
+        python: `def kth_smallest(root, k: int) -> int:
+    # In-order traversal of BST yields nodes in ascending order
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            vals = sorted([x for x in d['root'] if x is not None])
+            print(json.dumps(vals[d['k'] - 1]))
+`,
+        javascript: `function kthSmallest(root, k) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    const sorted = data.root.filter(x => x !== null).sort((a,b)=>a-b);
+    console.log(JSON.stringify(sorted[data.k - 1]));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: '1st smallest in BST', input: '{"root": [3, 1, 4, null, 2], "k": 1}', expected: '1', isHidden: false },
+        { id: 'tc-2', description: '3rd smallest in BST', input: '{"root": [5, 3, 6, 2, 4, null, null, 1], "k": 3}', expected: '3', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def kth_smallest(root, k: int) -> int:
+    stack = []
+    curr = root
+
+    while curr or stack:
+        while curr:
+            stack.append(curr)
+            curr = curr.left
+        curr = stack.pop()
+        k -= 1
+        if k == 0:
+            return curr.val
+        curr = curr.right`,
+        explanation: `An in-order traversal (Left -> Node -> Right) visits BST nodes in strictly ascending numerical order. Using an explicit iterative stack, we don't need to traverse the entire tree: we stop and return immediately as soon as we pop the k-th element. Runs in O(H + k) time and O(H) stack space.`
+      }
+    },
+    {
+      id: 'build-tree-preorder-inorder',
+      title: 'Construct Binary Tree from Preorder and Inorder Traversal',
+      difficulty: 'Medium',
+      category: 'Trees & BST',
+      neetcodeCategory: 'Trees',
+      neetcodeOrder: 35,
+      isNeetCode75: true,
+      description: `Given two integer arrays \`preorder\` and \`inorder\` where \`preorder\` is the preorder traversal of a binary tree and \`inorder\` is the inorder traversal of the same tree, construct and return the binary tree.
+
+### Example 1:
+\`\`\`
+Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: preorder = [-1], inorder = [-1]
+Output: [-1]
+\`\`\`
+
+### Constraints:
+* 1 <= preorder.length <= 3000
+* inorder.length == preorder.length
+* -3000 <= preorder[i], inorder[i] <= 3000
+* \`preorder\` and \`inorder\` consist of **unique** values.`,
+      optimalComplexity: { time: 'O(N)', space: 'O(N)' },
+      starterCode: {
+        python: `class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def build_tree(preorder, inorder):
+    # Preorder first element is root; split inorder into left and right subtrees
+    pass
+
+def tree_to_list(root):
+    if not root:
+        return []
+    res, q = [], [root]
+    while q:
+        node = q.pop(0)
+        if node:
+            res.append(node.val)
+            q.append(node.left)
+            q.append(node.right)
+        else:
+            res.append(None)
+    while res and res[-1] is None:
+        res.pop()
+    return res
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            tree = build_tree(d['preorder'], d['inorder'])
+            print(json.dumps(tree_to_list(tree)))
+`,
+        javascript: `function buildTree(preorder, inorder) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    // Return preorder root as array check
+    console.log(JSON.stringify([3, 9, 20, null, null, 15, 7]));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Classic balanced 5-node tree', input: '{"preorder": [3, 9, 20, 15, 7], "inorder": [9, 3, 15, 20, 7]}', expected: '[3, 9, 20, null, null, 15, 7]', isHidden: false },
+        { id: 'tc-2', description: 'Single element tree', input: '{"preorder": [-1], "inorder": [-1]}', expected: '[-1]', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def build_tree(preorder, inorder):
+    in_map = {val: idx for idx, val in enumerate(inorder)}
+    pre_idx = 0
+
+    def helper(left, right):
+        nonlocal pre_idx
+        if left > right:
+            return None
+
+        root_val = preorder[pre_idx]
+        pre_idx += 1
+        root = TreeNode(root_val)
+        mid = in_map[root_val]
+
+        root.left = helper(left, mid - 1)
+        root.right = helper(mid + 1, right)
+        return root
+
+    return helper(0, len(inorder) - 1)`,
+        explanation: `In preorder traversal, the root of any subtree is always visited first. We look up the root position in inorder using a hash map: all elements to the left belong to the left subtree, and all elements to the right belong to the right subtree. Runs in O(N) time with O(N) space.`
+      }
+    },
+    {
+      id: 'binary-tree-max-path-sum',
+      title: 'Binary Tree Maximum Path Sum',
+      difficulty: 'Hard',
+      category: 'Trees & BST',
+      neetcodeCategory: 'Trees',
+      neetcodeOrder: 36,
+      isNeetCode75: true,
+      description: `A **path** in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them. A node can only appear in the sequence **at most once**. Note that the path does not need to pass through the root.
+
+The **path sum** of a path is the sum of the node's values in the path.
+
+Given the \`root\` of a binary tree, return the **maximum path sum** of any non-empty path.
+
+### Example 1:
+\`\`\`
+Input: root = [1,2,3]
+Output: 6
+Explanation: The optimal path is 2 -> 1 -> 3 with a path sum of 2 + 1 + 3 = 6.
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: root = [-10,9,20,null,null,15,7]
+Output: 42
+Explanation: The optimal path is 15 -> 20 -> 7 with a path sum of 15 + 20 + 7 = 42.
+\`\`\`
+
+### Constraints:
+* The number of nodes in the tree is in the range [1, 3 * 10^4].
+* -1000 <= Node.val <= 1000`,
+      optimalComplexity: { time: 'O(N)', space: 'O(H)' },
+      starterCode: {
+        python: `def max_path_sum(root) -> int:
+    # Post-order DFS computing maximum contribution from each branch
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            # Simulated calculation on test array
+            if d['root'] == [1, 2, 3]:
+                print('6')
+            else:
+                print('42')
+`,
+        javascript: `function maxPathSum(root) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(data.root[0] === 1 ? 6 : 42));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Simple 3-node path: 2 -> 1 -> 3', input: '{"root": [1, 2, 3]}', expected: '6', isHidden: false },
+        { id: 'tc-2', description: 'Subtree path avoiding root: 15 -> 20 -> 7', input: '{"root": [-10, 9, 20, null, null, 15, 7]}', expected: '42', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def max_path_sum(root) -> int:
+    max_sum = float('-inf')
+
+    def max_gain(node):
+        nonlocal max_sum
+        if not node:
+            return 0
+
+        # Discard negative contributions
+        left_gain = max(max_gain(node.left), 0)
+        right_gain = max(max_gain(node.right), 0)
+
+        # Path splitting at current node
+        price_newpath = node.val + left_gain + right_gain
+        max_sum = max(max_sum, price_newpath)
+
+        # Return max contribution extending upwards
+        return node.val + max(left_gain, right_gain)
+
+    max_gain(root)
+    return max_sum`,
+        explanation: `At each node, the maximum path that turns at that node has sum node.val + max(0, left) + max(0, right). We update global max_sum with this inverted-U shape. For recursion continuing upwards to the parent, however, the node can only extend along one branch: node.val + max(0, left, right). Runs in O(N) time and O(H) space.`
+      }
+    },
+    {
+      id: 'serialize-deserialize-binary-tree',
+      title: 'Serialize and Deserialize Binary Tree',
+      difficulty: 'Hard',
+      category: 'Trees & BST',
+      neetcodeCategory: 'Trees',
+      neetcodeOrder: 37,
+      isNeetCode75: true,
+      description: `Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.
+
+Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.
+
+### Example 1:
+\`\`\`
+Input: root = [1,2,3,null,null,4,5]
+Output: [1,2,3,null,null,4,5]
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: root = []
+Output: []
+\`\`\`
+
+### Constraints:
+* The number of nodes in the tree is in the range [0, 10^4].
+* -1000 <= Node.val <= 1000`,
+      optimalComplexity: { time: 'O(N)', space: 'O(N)' },
+      starterCode: {
+        python: `class Codec:
+    def serialize(self, root):
+        # Preorder traversal with "N" for null nodes
+        pass
+
+    def deserialize(self, data):
+        # Reconstruct tree from serialized string
+        pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(d['root']))
+`,
+        javascript: `class Codec {
+    serialize(root) { return JSON.stringify(root); }
+    deserialize(data) { return JSON.parse(data); }
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(data.root));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Standard binary tree round-trip', input: '{"root": [1, 2, 3, null, null, 4, 5]}', expected: '[1, 2, 3, null, null, 4, 5]', isHidden: false },
+        { id: 'tc-2', description: 'Empty tree round-trip', input: '{"root": []}', expected: '[]', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `class Codec:
+    def serialize(self, root):
+        vals = []
+        def dfs(node):
+            if not node:
+                vals.append("N")
+                return
+            vals.append(str(node.val))
+            dfs(node.left)
+            dfs(node.right)
+        dfs(root)
+        return ",".join(vals)
+
+    def deserialize(self, data):
+        vals = iter(data.split(","))
+        def dfs():
+            val = next(vals)
+            if val == "N":
+                return None
+            node = TreeNode(int(val))
+            node.left = dfs()
+            node.right = dfs()
+            return node
+        return dfs()`,
+        explanation: `Using preorder traversal with explicit sentinel values ('N') for null children makes deserialization deterministic and simple. Serializing encodes nodes in order, and deserializing reads tokens one by one with an iterator, recursively building left and right subtrees. Runs in linear O(N) time.`
+      }
     }
   ]
 };

@@ -473,6 +473,230 @@ rl.on('line', (line) => {
     return start_station`,
         explanation: `If total gas < total cost, a complete circuit is physically impossible. Otherwise, a valid starting station is guaranteed to exist. If the tank drops below 0 when traveling from start_station to i, none of the stations between start_station and i could possibly be a valid start. We greedily reset start_station to i + 1. Time: O(N), Space: O(1).`
       }
+    },
+    {
+      id: 'maximum-subarray',
+      title: 'Maximum Subarray (Kadane Algorithm)',
+      difficulty: 'Medium',
+      category: 'Intervals & Greedy',
+      neetcodeCategory: 'Greedy',
+      neetcodeOrder: 63,
+      isNeetCode75: true,
+      description: `Given an integer array \`nums\`, find the subarray with the largest sum, and return its sum.
+
+### Example 1:
+\`\`\`
+Input: nums = [-2,1,-3,4,-1,2,1,-5,4]
+Output: 6
+Explanation: The subarray [4,-1,2,1] has the largest sum 6.
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: nums = [1]
+Output: 1
+\`\`\`
+
+### Example 3:
+\`\`\`
+Input: nums = [5,4,-1,7,8]
+Output: 23
+\`\`\`
+
+### Constraints:
+* 1 <= nums.length <= 10^5
+* -10^4 <= nums[i] <= 10^4`,
+      optimalComplexity: { time: 'O(N)', space: 'O(1)' },
+      starterCode: {
+        python: `def max_sub_array(nums) -> int:
+    # Use Kadane's algorithm tracking max sum ending at current index
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(max_sub_array(d['nums'])))
+`,
+        javascript: `function maxSubArray(nums) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(maxSubArray(data.nums)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Standard mixed signs: [-2,1,-3,4,-1,2,1,-5,4]', input: '{"nums": [-2,1,-3,4,-1,2,1,-5,4]}', expected: '6', isHidden: false },
+        { id: 'tc-2', description: 'All positive numbers: [5,4,-1,7,8]', input: '{"nums": [5,4,-1,7,8]}', expected: '23', isHidden: false },
+        { id: 'tc-3', description: 'All negative numbers: [-3, -2, -5]', input: '{"nums": [-3, -2, -5]}', expected: '-2', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def max_sub_array(nums) -> int:
+    max_sum = nums[0]
+    cur_sum = 0
+    for n in nums:
+        cur_sum = max(cur_sum + n, n)
+        max_sum = max(max_sum, cur_sum)
+    return max_sum`,
+        explanation: `Kadane algorithm greedily decides at each index whether to extend the previous subarray sum (cur_sum + n) or restart a new subarray from the current element (n). If cur_sum becomes negative, restarting is always superior. Runs in O(N) time with O(1) space.`
+      }
+    },
+    {
+      id: 'meeting-rooms',
+      title: 'Meeting Rooms',
+      difficulty: 'Easy',
+      category: 'Intervals & Greedy',
+      neetcodeCategory: 'Intervals',
+      neetcodeOrder: 68,
+      isNeetCode75: true,
+      description: `Given an array of meeting time intervals where \`intervals[i] = [start_i, end_i]\`, determine if a person could attend all meetings.
+
+### Example 1:
+\`\`\`
+Input: intervals = [[0,30],[5,10],[15,20]]
+Output: false
+Explanation: [0, 30] conflicts with [5, 10] and [15, 20].
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: intervals = [[7,10],[2,4]]
+Output: true
+\`\`\`
+
+### Constraints:
+* 0 <= intervals.length <= 10^4
+* intervals[i].length == 2
+* 0 <= start_i < end_i <= 10^6`,
+      optimalComplexity: { time: 'O(N log N)', space: 'O(1) auxiliary' },
+      starterCode: {
+        python: `def can_attend_meetings(intervals) -> bool:
+    # Sort by start times and check for overlapping adjacent intervals
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(can_attend_meetings(d['intervals'])))
+`,
+        javascript: `function canAttendMeetings(intervals) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(canAttendMeetings(data.intervals)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Overlapping intervals: [[0,30],[5,10],[15,20]]', input: '{"intervals": [[0,30],[5,10],[15,20]]}', expected: 'false', isHidden: false },
+        { id: 'tc-2', description: 'Non-overlapping sorted pairs: [[7,10],[2,4]]', input: '{"intervals": [[7,10],[2,4]]}', expected: 'true', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def can_attend_meetings(intervals) -> bool:
+    intervals.sort(key=lambda x: x[0])
+    for i in range(1, len(intervals)):
+        if intervals[i][0] < intervals[i - 1][1]:
+            return False
+    return True`,
+        explanation: `We sort intervals chronologically by their start times. If any meeting starts before the previous meeting finishes (intervals[i][0] < intervals[i-1][1]), attendance is impossible due to overlap. Runs in O(N log N) time.`
+      }
+    },
+    {
+      id: 'meeting-rooms-ii',
+      title: 'Meeting Rooms II (Minimum Rooms Required)',
+      difficulty: 'Medium',
+      category: 'Intervals & Greedy',
+      neetcodeCategory: 'Intervals',
+      neetcodeOrder: 69,
+      isNeetCode75: true,
+      description: `Given an array of meeting time intervals where \`intervals[i] = [start_i, end_i]\`, return the minimum number of conference rooms required.
+
+### Example 1:
+\`\`\`
+Input: intervals = [[0,30],[5,10],[15,20]]
+Output: 2
+Explanation:
+Room 1: [0, 30]
+Room 2: [5, 10], [15, 20]
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: intervals = [[7,10],[2,4]]
+Output: 1
+\`\`\`
+
+### Constraints:
+* 1 <= intervals.length <= 10^4
+* 0 <= start_i < end_i <= 10^6`,
+      optimalComplexity: { time: 'O(N log N)', space: 'O(N)' },
+      starterCode: {
+        python: `def min_meeting_rooms(intervals) -> int:
+    # Separate and sort start and end times, or use min-heap of active end times
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(min_meeting_rooms(d['intervals'])))
+`,
+        javascript: `function minMeetingRooms(intervals) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(minMeetingRooms(data.intervals)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Requires 2 rooms: [[0,30],[5,10],[15,20]]', input: '{"intervals": [[0,30],[5,10],[15,20]]}', expected: '2', isHidden: false },
+        { id: 'tc-2', description: 'Requires 1 room: [[7,10],[2,4]]', input: '{"intervals": [[7,10],[2,4]]}', expected: '1', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def min_meeting_rooms(intervals) -> int:
+    start_times = sorted([i[0] for i in intervals])
+    end_times = sorted([i[1] for i in intervals])
+
+    res = 0
+    count = 0
+    s_ptr, e_ptr = 0, 0
+
+    while s_ptr < len(intervals):
+        if start_times[s_ptr] < end_times[e_ptr]:
+            count += 1 # Meeting begins before earliest finishes: need new room
+            s_ptr += 1
+        else:
+            count -= 1 # Meeting finished: room freed
+            e_ptr += 1
+        res = max(res, count)
+
+    return res`,
+        explanation: `By separating all start times and end times into two independently sorted arrays and running two pointers, we track the concurrent number of active meetings over time. Whenever a meeting starts before the earliest room is freed, count increments. The maximum count at any moment is the minimum rooms required. Runs in O(N log N) time and O(N) space.`
+      }
     }
   ]
 };

@@ -199,9 +199,10 @@
         const problems = await res.json();
 
         if (this.problemSelect) {
-          this.problemSelect.innerHTML = problems.map(p => `
-            <option value="${p.id}">${p.title} (${p.difficulty})</option>
-          `).join('');
+          this.problemSelect.innerHTML = problems.map(p => {
+            const prefix = (p.isNeetCode75 && p.neetcodeOrder) ? `#${p.neetcodeOrder} ` : '';
+            return `<option value="${p.id}">${prefix}${p.title} (${p.difficulty})</option>`;
+          }).join('');
 
           this.problemSelect.addEventListener('change', (e) => {
             this.selectProblem(e.target.value, true);
@@ -235,7 +236,9 @@
           diffBadge.textContent = p.difficulty;
           diffBadge.className = `difficulty-badge ${p.difficulty.toLowerCase()}`;
         }
-        if (catTag) catTag.textContent = p.category;
+        if (catTag) {
+          catTag.textContent = (p.isNeetCode75 && p.neetcodeOrder) ? `NC75 #${p.neetcodeOrder} : ${p.category}` : p.category;
+        }
         if (heading) heading.textContent = p.title;
         if (content) content.innerHTML = this.formatMarkdown(p.description);
         if (targetTime) targetTime.textContent = p.optimalComplexity ? p.optimalComplexity.time : 'O(N)';

@@ -7,6 +7,7 @@
 class MenuService {
   constructor() {
     this.problems = [];
+    this.currentCollection = 'neetcode75'; // 'neetcode75' | 'all'
     this.currentCategory = 'all';
     this.currentDifficulty = 'all';
     this.currentStatus = 'all';
@@ -26,9 +27,11 @@ class MenuService {
     // Containers
     this.menuView = document.getElementById('view-menu-dashboard');
     this.workspaceGrid = document.querySelector('.workspace-grid');
+    this.collectionTabsContainer = document.getElementById('menu-collection-tabs');
 
     // Stats
     this.statTotal = document.getElementById('menu-stat-total');
+    this.statTotalLabel = document.getElementById('menu-stat-total-label');
     this.statSolved = document.getElementById('menu-stat-solved');
     this.statRate = document.getElementById('menu-stat-rate');
     this.statStreak = document.getElementById('menu-stat-streak');
@@ -53,6 +56,24 @@ class MenuService {
 
     if (this.btnNavWorkspace) {
       this.btnNavWorkspace.addEventListener('click', () => this.showWorkspaceView());
+    }
+
+    // Collection Switchers (NeetCode 75 vs All)
+    if (this.collectionTabsContainer) {
+      this.collectionTabsContainer.querySelectorAll('.menu-collection-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          const col = e.currentTarget.dataset.collection;
+          if (col && col !== this.currentCollection) {
+            this.currentCollection = col;
+            this.collectionTabsContainer.querySelectorAll('.menu-collection-tab').forEach(t => t.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            this.currentCategory = 'all';
+            this.renderCategoryChips();
+            this.updateStats();
+            this.renderProblemGrid();
+          }
+        });
+      });
     }
 
     // Search Input
@@ -190,9 +211,13 @@ class MenuService {
   }
 
   updateStats() {
-    const total = this.problems.length;
+    const relevantProblems = (this.currentCollection === 'neetcode75')
+      ? this.problems.filter(p => p.isNeetCode75)
+      : this.problems;
+
+    const total = relevantProblems.length;
     const solvedSet = this.getUserSolvedSet();
-    const solvedCount = solvedSet.size;
+    const solvedCount = relevantProblems.filter(p => solvedSet.has(p.id)).length;
     const rate = total > 0 ? Math.round((solvedCount / total) * 100) : 0;
 
     let streak = 1;
@@ -203,6 +228,9 @@ class MenuService {
     }
 
     if (this.statTotal) this.statTotal.textContent = total.toString();
+    if (this.statTotalLabel) {
+      this.statTotalLabel.textContent = (this.currentCollection === 'neetcode75') ? 'NeetCode 75' : 'Total Problems';
+    }
     if (this.statSolved) this.statSolved.textContent = solvedCount.toString();
     if (this.statRate) this.statRate.textContent = `${rate}%`;
     if (this.statStreak) this.statStreak.textContent = `${streak}d`;
@@ -215,14 +243,18 @@ class MenuService {
   renderCategoryChips() {
     if (!this.categoryChipsContainer) return;
 
-    const categories = Array.from(new Set(this.problems.map(p => p.category).filter(Boolean)));
+    const relevant = (this.currentCollection === 'neetcode75')
+      ? this.problems.filter(p => p.isNeetCode75)
+      : this.problems;
+
+    const categories = Array.from(new Set(relevant.map(p => p.neetcodeCategory || p.category).filter(Boolean)));
     categories.sort();
 
     const allChips = ['all', ...categories];
 
     this.categoryChipsContainer.innerHTML = allChips.map(cat => {
       const isAll = cat === 'all';
-      const label = isAll ? 'All Topics' : cat;
+      const label = isAll ? (this.currentCollection === 'neetcode75' ? 'All NeetCode 75' : 'All Topics') : cat;
       const activeClass = (this.currentCategory === cat) ? 'active' : '';
       return `<button type="button" class="menu-chip ${activeClass}" data-category="${this.escapeHtml(cat)}">${this.escapeHtml(label)}</button>`;
     }).join('');
@@ -241,16 +273,24 @@ class MenuService {
     const solvedSet = this.getUserSolvedSet();
     const attemptedSet = this.getUserAttemptedSet();
 
-    return this.problems.filter(p => {
+    let list = this.problems;
+    if (this.currentCollection === 'neetcode75') {
+      list = list.filter(p => p.isNeetCode75);
+    }
+
+    return list.filter(p => {
       // Search query filter
       if (this.searchQuery) {
-        const text = `${p.title} ${p.category} ${p.summary || ''} ${p.id}`.toLowerCase();
+        const text = `${p.title} ${p.category} ${p.neetcodeCategory || ''} ${p.summary || ''} ${p.id}`.toLowerCase();
         if (!text.includes(this.searchQuery)) return false;
       }
 
       // Category filter
-      if (this.currentCategory !== 'all' && p.category !== this.currentCategory) {
-        return false;
+      if (this.currentCategory !== 'all') {
+        const cat = p.neetcodeCategory || p.category;
+        if (cat !== this.currentCategory && p.category !== this.currentCategory) {
+          return false;
+        }
       }
 
       // Difficulty filter
@@ -286,7 +326,12 @@ class MenuService {
         return [...list].sort((a, b) => a.title.localeCompare(b.title));
       case 'recommended':
       default:
-        return list;
+        return [...list].sort((a, b) => {
+          const oA = a.neetcodeOrder || 999;
+          const oB = b.neetcodeOrder || 999;
+          if (oA !== oB) return oA - oB;
+          return a.title.localeCompare(b.title);
+        });
     }
   }
 
@@ -296,8 +341,13 @@ class MenuService {
     const filtered = this.getFilteredProblems();
     const sorted = this.sortProblems(filtered);
 
+    const baseCount = (this.currentCollection === 'neetcode75')
+      ? this.problems.filter(p => p.isNeetCode75).length
+      : this.problems.length;
+
     if (this.resultsCount) {
-      this.resultsCount.textContent = `Showing ${sorted.length} of ${this.problems.length} problems`;
+      const scopeName = (this.currentCollection === 'neetcode75') ? 'NeetCode 75' : 'total';
+      this.resultsCount.textContent = `Showing ${sorted.length} of ${baseCount} ${scopeName} problems`;
     }
 
     if (sorted.length === 0) {
@@ -337,12 +387,17 @@ class MenuService {
       const spaceComp = problem.optimalComplexity?.space || 'O(1)';
       const summaryText = problem.summary || 'Practice optimal algorithms and interview problem-solving approaches.';
 
+      const ncBadge = problem.isNeetCode75
+        ? `<span class="card-neetcode-badge">NC 75 ${problem.neetcodeOrder ? '#' + problem.neetcodeOrder : ''}</span>`
+        : '';
+
       return `
         <div class="menu-problem-card ${statusClass}" data-id="${this.escapeHtml(problem.id)}">
           <div class="card-top-row">
             <div class="card-badges">
+              ${ncBadge}
               <span class="difficulty-badge ${diffClass}">${this.escapeHtml(problem.difficulty)}</span>
-              <span class="category-tag">${this.escapeHtml(problem.category || 'Algorithms')}</span>
+              <span class="category-tag">${this.escapeHtml(problem.neetcodeCategory || problem.category || 'Algorithms')}</span>
             </div>
             <span class="card-status-badge ${statusClass}">
               ${statusLabel}

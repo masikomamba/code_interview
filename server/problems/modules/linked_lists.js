@@ -710,6 +710,162 @@ class LRUCache:
             del self.cache[lru.key]`,
         explanation: `We pair a Hash Map with a Doubly-Linked List with sentinel head and tail nodes. The map yields O(1) lookup. The doubly linked list allows O(1) removal and re-insertion at the tail to mark an entry as most recently used. When capacity is exceeded, the node immediately following head (the LRU entry) is evicted in O(1).`
       }
+    },
+    {
+      id: 'merge-k-sorted-lists',
+      title: 'Merge k Sorted Lists',
+      difficulty: 'Hard',
+      category: 'Linked Lists',
+      neetcodeCategory: 'Linked Lists',
+      neetcodeOrder: 26,
+      isNeetCode75: true,
+      description: `You are given an array of \`k\` linked-lists \`lists\`, each linked-list is sorted in ascending order.
+
+Merge all the linked-lists into one sorted linked-list and return it.
+
+### Example 1:
+\`\`\`
+Input: lists = [[1,4,5],[1,3,4],[2,6]]
+Output: [1,1,2,3,4,4,5,6]
+Explanation: The linked-lists are:
+[
+  1->4->5,
+  1->3->4,
+  2->6
+]
+merging them into one sorted list:
+1->1->2->3->4->4->5->6
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: lists = []
+Output: []
+\`\`\`
+
+### Example 3:
+\`\`\`
+Input: lists = [[]]
+Output: []
+\`\`\`
+
+### Constraints:
+* k == lists.length
+* 0 <= k <= 10^4
+* 0 <= lists[i].length <= 500
+* -10^4 <= lists[i][j] <= 10^4
+* lists[i] is sorted in ascending order.
+* The sum of lists[i].length will not exceed 10^4.`,
+      optimalComplexity: { time: 'O(N log k)', space: 'O(1) extra space using divide and conquer' },
+      starterCode: {
+        python: `class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def merge_k_lists(lists):
+    # Divide and conquer pairwise list merging
+    pass
+
+def array_to_list(arr):
+    dummy = ListNode(0)
+    curr = dummy
+    for v in arr:
+        curr.next = ListNode(v)
+        curr = curr.next
+    return dummy.next
+
+def list_to_array(head):
+    res = []
+    while head:
+        res.append(head.val)
+        head = head.next
+    return res
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            heads = [array_to_list(arr) for arr in d['lists']]
+            merged = merge_k_lists(heads)
+            print(json.dumps(list_to_array(merged)))
+`,
+        javascript: `class ListNode {
+    constructor(val = 0, next = null) {
+        this.val = val;
+        this.next = next;
+    }
+}
+
+function mergeKLists(lists) {
+    // Write your solution here
+}
+
+function arrayToList(arr) {
+    const dummy = new ListNode(0);
+    let curr = dummy;
+    for (const v of arr) {
+        curr.next = new ListNode(v);
+        curr = curr.next;
+    }
+    return dummy.next;
+}
+
+function listToArray(head) {
+    const res = [];
+    while (head) {
+        res.push(head.val);
+        head = head.next;
+    }
+    return res;
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    const heads = (data.lists || []).map(arrayToList);
+    const merged = mergeKLists(heads);
+    console.log(JSON.stringify(listToArray(merged)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Three sorted lists', input: '{"lists": [[1,4,5],[1,3,4],[2,6]]}', expected: '[1, 1, 2, 3, 4, 4, 5, 6]', isHidden: false },
+        { id: 'tc-2', description: 'Empty outer list', input: '{"lists": []}', expected: '[]', isHidden: false },
+        { id: 'tc-3', description: 'List containing single empty sublist', input: '{"lists": [[]]}', expected: '[]', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def merge_two(l1, l2):
+    dummy = ListNode(0)
+    curr = dummy
+    while l1 and l2:
+        if l1.val <= l2.val:
+            curr.next = l1
+            l1 = l1.next
+        else:
+            curr.next = l2
+            l2 = l2.next
+        curr = curr.next
+    curr.next = l1 or l2
+    return dummy.next
+
+def merge_k_lists(lists):
+    if not lists:
+        return None
+    while len(lists) > 1:
+        merged = []
+        for i in range(0, len(lists), 2):
+            l1 = lists[i]
+            l2 = lists[i + 1] if (i + 1) < len(lists) else None
+            merged.append(merge_two(l1, l2))
+        lists = merged
+    return lists[0]`,
+        explanation: `Instead of iteratively merging one list at a time (which would take O(k * N)), we use divide-and-conquer to merge pairs of lists simultaneously. In each round, the number of lists is halved (log k rounds). Since each round processes all N total nodes, total runtime is O(N log k).`
+      }
     }
   ]
 };

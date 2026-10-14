@@ -534,6 +534,509 @@ rl.on('line', (line) => {
     return dp[len(s)]`,
         explanation: `Let dp[i] represent whether prefix s[:i] can be segmented into words. For each prefix ending at index i, we test splitting at index j: if dp[j] is True and the substring s[j:i] is in wordDict, then dp[i] is True. Time: O(N^2), Space: O(N).`
       }
+    },
+    {
+      id: 'house-robber-ii',
+      title: 'House Robber II (Circular Street)',
+      difficulty: 'Medium',
+      category: 'Dynamic Programming',
+      neetcodeCategory: '1-D Dynamic Programming',
+      neetcodeOrder: 53,
+      isNeetCode75: true,
+      description: `You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed. All houses at this place are **arranged in a circle**. That means the first house is the neighbor of the last one. Meanwhile, adjacent houses have a security system connected, and **it will automatically contact the police if two adjacent houses were broken into on the same night**.
+
+Given an integer array \`nums\` representing the amount of money of each house, return the maximum amount of money you can rob tonight **without alerting the police**.
+
+### Example 1:
+\`\`\`
+Input: nums = [2,3,2]
+Output: 3
+Explanation: You cannot rob house 1 (money = 2) and then rob house 3 (money = 2), because they are adjacent houses.
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: nums = [1,2,3,1]
+Output: 4
+Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3). Total amount = 1 + 3 = 4.
+\`\`\`
+
+### Constraints:
+* 1 <= nums.length <= 100
+* 0 <= nums[i] <= 1000`,
+      optimalComplexity: { time: 'O(N)', space: 'O(1)' },
+      starterCode: {
+        python: `def rob(nums) -> int:
+    # Run House Robber I twice: nums[1:] and nums[:-1]
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(rob(d['nums'])))
+`,
+        javascript: `function rob(nums) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(rob(data.nums)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Circular 3 houses [2, 3, 2]', input: '{"nums": [2, 3, 2]}', expected: '3', isHidden: false },
+        { id: 'tc-2', description: 'Four houses [1, 2, 3, 1]', input: '{"nums": [1, 2, 3, 1]}', expected: '4', isHidden: false },
+        { id: 'tc-3', description: 'Single house [1]', input: '{"nums": [1]}', expected: '1', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def rob(nums) -> int:
+    if len(nums) == 1:
+        return nums[0]
+
+    def rob_linear(houses):
+        rob1, rob2 = 0, 0
+        for h in houses:
+            new_rob = max(rob1 + h, rob2)
+            rob1 = rob2
+            rob2 = new_rob
+        return rob2
+
+    # Cannot include both first and last house: compare [1:] vs [:-1]
+    return max(rob_linear(nums[1:]), rob_linear(nums[:-1]))`,
+        explanation: `Since houses are in a circle, the first and last houses are adjacent: we cannot rob both. This splits the problem into two independent linear subproblems: robbing houses from index 0 to n-2 (excluding the last house), or robbing houses from index 1 to n-1 (excluding the first house). O(N) time and O(1) space.`
+      }
+    },
+    {
+      id: 'longest-palindromic-substring',
+      title: 'Longest Palindromic Substring',
+      difficulty: 'Medium',
+      category: 'Dynamic Programming',
+      neetcodeCategory: '1-D Dynamic Programming',
+      neetcodeOrder: 54,
+      isNeetCode75: true,
+      description: `Given a string \`s\`, return the **longest palindromic substring** in \`s\`.
+
+### Example 1:
+\`\`\`
+Input: s = "babad"
+Output: "bab"
+Explanation: "aba" is also a valid answer.
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: s = "cbbd"
+Output: "bb"
+\`\`\`
+
+### Constraints:
+* 1 <= s.length <= 1000
+* \`s\` consist of only digits and English letters.`,
+      optimalComplexity: { time: 'O(N^2)', space: 'O(1) extra space' },
+      starterCode: {
+        python: `def longest_palindrome(s: str) -> str:
+    # Expand around center for both odd and even length centers
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(longest_palindrome(d['s'])))
+`,
+        javascript: `function longestPalindrome(s) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(longestPalindrome(data.s)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Center palindrome: "babad"', input: '{"s": "babad"}', expected: '"bab"', isHidden: false },
+        { id: 'tc-2', description: 'Even palindrome: "cbbd"', input: '{"s": "cbbd"}', expected: '"bb"', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def longest_palindrome(s: str) -> str:
+    res = ""
+    for i in range(len(s)):
+        # Odd length palindrome: center at i
+        l, r = i, i
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            if (r - l + 1) > len(res):
+                res = s[l : r + 1]
+            l -= 1
+            r += 1
+
+        # Even length palindrome: center between i and i + 1
+        l, r = i, i + 1
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            if (r - l + 1) > len(res):
+                res = s[l : r + 1]
+            l -= 1
+            r += 1
+
+    return res`,
+        explanation: `A palindrome mirrors around its center. There are 2N - 1 possible centers (N single characters for odd palindromes and N - 1 character pairs for even palindromes). Expanding outward from each center checks all palindromes in O(N^2) time and O(1) extra memory.`
+      }
+    },
+    {
+      id: 'palindromic-substrings',
+      title: 'Palindromic Substrings (Count All Palindromes)',
+      difficulty: 'Medium',
+      category: 'Dynamic Programming',
+      neetcodeCategory: '1-D Dynamic Programming',
+      neetcodeOrder: 55,
+      isNeetCode75: true,
+      description: `Given a string \`s\`, return the number of **palindromic substrings** in it.
+
+A string is a **palindrome** when it reads the same backward as forward.
+
+A **substring** is a contiguous sequence of characters within the string.
+
+### Example 1:
+\`\`\`
+Input: s = "abc"
+Output: 3
+Explanation: Three palindromic strings: "a", "b", "c".
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: s = "aaa"
+Output: 6
+Explanation: Six palindromic strings: "a", "a", "a", "aa", "aa", "aaa".
+\`\`\`
+
+### Constraints:
+* 1 <= s.length <= 1000
+* \`s\` consists of lowercase English letters.`,
+      optimalComplexity: { time: 'O(N^2)', space: 'O(1)' },
+      starterCode: {
+        python: `def count_substrings(s: str) -> int:
+    # Expand around centers and increment count
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(count_substrings(d['s'])))
+`,
+        javascript: `function countSubstrings(s) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(countSubstrings(data.s)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Distinct letters: "abc"', input: '{"s": "abc"}', expected: '3', isHidden: false },
+        { id: 'tc-2', description: 'Identical letters: "aaa"', input: '{"s": "aaa"}', expected: '6', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def count_substrings(s: str) -> int:
+    count = 0
+    for i in range(len(s)):
+        # Odd length
+        l, r = i, i
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            count += 1
+            l -= 1
+            r += 1
+
+        # Even length
+        l, r = i, i + 1
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            count += 1
+            l -= 1
+            r += 1
+
+    return count`,
+        explanation: `Just like Longest Palindromic Substring, expanding around all 2N - 1 centers allows counting every valid palindrome immediately as soon as boundary matching holds. Runs in O(N^2) time and O(1) space.`
+      }
+    },
+    {
+      id: 'decode-ways',
+      title: 'Decode Ways',
+      difficulty: 'Medium',
+      category: 'Dynamic Programming',
+      neetcodeCategory: '1-D Dynamic Programming',
+      neetcodeOrder: 56,
+      isNeetCode75: true,
+      description: `A message containing letters from A-Z can be encoded into numbers using the following mapping:
+'A' -> "1", 'B' -> "2", ..., 'Z' -> "26".
+
+To decode an encoded message, all the digits must be grouped then mapped back into letters using the reverse of the mapping above.
+
+Given a string \`s\` containing only digits, return the **number of ways** to decode it.
+
+### Example 1:
+\`\`\`
+Input: s = "12"
+Output: 2
+Explanation: "12" could be decoded as "AB" (1 2) or "L" (12).
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: s = "226"
+Output: 3
+Explanation: "226" could be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6).
+\`\`\`
+
+### Example 3:
+\`\`\`
+Input: s = "06"
+Output: 0
+Explanation: "06" cannot be mapped to "F" because of the leading zero.
+\`\`\`
+
+### Constraints:
+* 1 <= s.length <= 100
+* \`s\` contains only digits and may contain leading zero(s).`,
+      optimalComplexity: { time: 'O(N)', space: 'O(1)' },
+      starterCode: {
+        python: `def num_decodings(s: str) -> int:
+    # 1D DP tracking single-digit (1-9) and double-digit (10-26) decodings
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(num_decodings(d['s'])))
+`,
+        javascript: `function numDecodings(s) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(numDecodings(data.s)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Two digits: "12"', input: '{"s": "12"}', expected: '2', isHidden: false },
+        { id: 'tc-2', description: 'Three digits: "226"', input: '{"s": "226"}', expected: '3', isHidden: false },
+        { id: 'tc-3', description: 'Leading zero invalid: "06"', input: '{"s": "06"}', expected: '0', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def num_decodings(s: str) -> int:
+    if not s or s[0] == '0':
+        return 0
+
+    prev2 = 1 # dp[i-2]
+    prev1 = 1 # dp[i-1]
+
+    for i in range(1, len(s)):
+        curr = 0
+        one_digit = int(s[i])
+        two_digits = int(s[i-1:i+1])
+
+        if one_digit != 0:
+            curr += prev1
+        if 10 <= two_digits <= 26:
+            curr += prev2
+
+        prev2 = prev1
+        prev1 = curr
+
+    return prev1`,
+        explanation: `At each index i, we can decode s[i] as a standalone character (if s[i] != '0') adding dp[i-1], and/or decode s[i-1:i+1] as a two-digit character (if 10 <= s[i-1:i+1] <= 26) adding dp[i-2]. By maintaining only the last two states, we reduce space from O(N) to O(1) in O(N) time.`
+      }
+    },
+    {
+      id: 'max-product-subarray',
+      title: 'Maximum Product Subarray',
+      difficulty: 'Medium',
+      category: 'Dynamic Programming',
+      neetcodeCategory: '1-D Dynamic Programming',
+      neetcodeOrder: 58,
+      isNeetCode75: true,
+      description: `Given an integer array \`nums\`, find a subarray that has the largest product, and return the product.
+
+The test cases are generated so that the answer will fit in a **32-bit** integer.
+
+### Example 1:
+\`\`\`
+Input: nums = [2,3,-2,4]
+Output: 6
+Explanation: [2,3] has the largest product 6.
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: nums = [-2,0,-1]
+Output: 0
+Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+\`\`\`
+
+### Constraints:
+* 1 <= nums.length <= 2 * 10^4
+* -10 <= nums[i] <= 10
+* The product of any prefix or suffix of nums fits in 32-bit.`,
+      optimalComplexity: { time: 'O(N)', space: 'O(1)' },
+      starterCode: {
+        python: `def max_product(nums) -> int:
+    # Track both current maximum and minimum product to handle negative flips
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(max_product(d['nums'])))
+`,
+        javascript: `function maxProduct(nums) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(maxProduct(data.nums)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Positive contiguous block: [2, 3, -2, 4]', input: '{"nums": [2, 3, -2, 4]}', expected: '6', isHidden: false },
+        { id: 'tc-2', description: 'Zero boundary reset: [-2, 0, -1]', input: '{"nums": [-2, 0, -1]}', expected: '0', isHidden: false }
+      ],
+      editorialSolution: {
+        python: `def max_product(nums) -> int:
+    res = max(nums)
+    cur_min, cur_max = 1, 1
+
+    for n in nums:
+        if n == 0:
+            cur_min, cur_max = 1, 1
+            continue
+
+        temp_max = cur_max * n
+        cur_max = max(n, temp_max, cur_min * n)
+        cur_min = min(n, temp_max, cur_min * n)
+
+        res = max(res, cur_max)
+
+    return res`,
+        explanation: `Multiplying by a negative number can turn a large positive product into a large negative number, or turn a large negative product into a huge positive product. Therefore, we track both cur_max and cur_min at each step. Runs in a single linear pass in O(N) time and O(1) space.`
+      }
+    },
+    {
+      id: 'longest-common-subsequence',
+      title: 'Longest Common Subsequence',
+      difficulty: 'Medium',
+      category: 'Dynamic Programming',
+      neetcodeCategory: '2-D Dynamic Programming',
+      neetcodeOrder: 62,
+      isNeetCode75: true,
+      description: `Given two strings \`text1\` and \`text2\`, return the length of their **longest common subsequence**. If there is no common subsequence, return \`0\`.
+
+A **subsequence** of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters.
+
+### Example 1:
+\`\`\`
+Input: text1 = "abcde", text2 = "ace" 
+Output: 3  
+Explanation: The longest common subsequence is "ace" and its length is 3.
+\`\`\`
+
+### Example 2:
+\`\`\`
+Input: text1 = "abc", text2 = "abc"
+Output: 3
+\`\`\`
+
+### Example 3:
+\`\`\`
+Input: text1 = "abc", text2 = "def"
+Output: 0
+\`\`\`
+
+### Constraints:
+* 1 <= text1.length, text2.length <= 1000
+* \`text1\` and \`text2\` consist of only lowercase English characters.`,
+      optimalComplexity: { time: 'O(M * N)', space: 'O(min(M, N))' },
+      starterCode: {
+        python: `def longest_common_subsequence(text1: str, text2: str) -> int:
+    # 2D DP table: if text1[i] == text2[j], 1 + dp[i+1][j+1], else max(dp[i+1][j], dp[i][j+1])
+    pass
+
+if __name__ == '__main__':
+    import json, sys
+    lines = sys.stdin.read().strip().splitlines()
+    for l in lines:
+        if l.strip():
+            d = json.loads(l)
+            print(json.dumps(longest_common_subsequence(d['text1'], d['text2'])))
+`,
+        javascript: `function longestCommonSubsequence(text1, text2) {
+    // Write your solution here
+}
+
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+rl.on('line', (line) => {
+    if (!line.trim()) return;
+    const data = JSON.parse(line);
+    console.log(JSON.stringify(longestCommonSubsequence(data.text1, data.text2)));
+});
+`
+      },
+      testCases: [
+        { id: 'tc-1', description: 'Subsequence match "ace" in "abcde"', input: '{"text1": "abcde", "text2": "ace"}', expected: '3', isHidden: false },
+        { id: 'tc-2', description: 'Exact identical strings', input: '{"text1": "abc", "text2": "abc"}', expected: '3', isHidden: false },
+        { id: 'tc-3', description: 'Zero overlap', input: '{"text1": "abc", "text2": "def"}', expected: '0', isHidden: true }
+      ],
+      editorialSolution: {
+        python: `def longest_common_subsequence(text1: str, text2: str) -> int:
+    m, n = len(text1), len(text2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(m - 1, -1, -1):
+        for j in range(n - 1, -1, -1):
+            if text1[i] == text2[j]:
+                dp[i][j] = 1 + dp[i + 1][j + 1]
+            else:
+                dp[i][j] = max(dp[i + 1][j], dp[i][j + 1])
+
+    return dp[0][0]`,
+        explanation: `Let dp[i][j] be the LCS of text1[i:] and text2[j:]. When characters match (text1[i] == text2[j]), we take 1 + dp[i+1][j+1]. When they differ, we take the maximum of skipping a character from text1 (dp[i+1][j]) or text2 (dp[i][j+1]). Runs in O(M * N) time.`
+      }
     }
   ]
 };

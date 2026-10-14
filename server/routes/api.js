@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { listProblems, getProblemById, getEditorialSolution, DSA_CURRICULUM } = require('../problems/bank');
+const { listProblems, getProblemById, getEditorialSolution, DSA_CURRICULUM, NEETCODE_75_ROADMAP } = require('../problems/bank');
 const { createRoom, getRoom, validateRole, getClientRoomState, broadcast } = require('../rooms');
 const { executeCode, runTestCases } = require('../execution/runner');
 const { generateEvaluationReport, askAiMentor } = require('../ai/evaluator');
@@ -116,6 +116,16 @@ router.get('/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
+  });
+});
+
+/**
+ * Canonical NeetCode 75 Roadmap manifest
+ */
+router.get('/neetcode75', (req, res) => {
+  res.json({
+    total: NEETCODE_75_ROADMAP.length,
+    roadmap: NEETCODE_75_ROADMAP
   });
 });
 
